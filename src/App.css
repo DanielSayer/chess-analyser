@@ -1082,7 +1082,7 @@
 @media (max-width: 1280px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr);
-    --board-col: min(100%, 680px);
+    --board-col: min(100%, 680px, max(380px, calc(100dvh - 300px + 30px)));
   }
 
   .workspace__panel {
@@ -1093,7 +1093,7 @@
   }
 }
 
-@media (max-width: 1280px) and (min-width: 1000px) {
+@media (max-width: 1280px) and (min-width: 1180px) {
   .workspace {
     grid-template-columns: minmax(0, 1fr) 320px;
     --board-col: min(100%, max(380px, calc(100dvh - 300px + 30px)));
