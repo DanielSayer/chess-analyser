@@ -1,111 +1,85 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+@import "tailwindcss";
+@import "@heroui/styles";
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+/*
+ * Chess Analyser theme. A dark, low-glare workspace with one green accent.
+ * Overrides HeroUI's dark tokens so every component picks up the palette.
+ */
+:root,
+.dark,
+[data-theme="dark"] {
+  color-scheme: dark;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --background: #0e1210;
+  --foreground: #e4e9e5;
+  --surface: #151a17;
+  --surface-foreground: var(--foreground);
+  --surface-secondary: #1b221e;
+  --surface-secondary-foreground: var(--foreground);
+  --surface-tertiary: #222a25;
+  --surface-tertiary-foreground: var(--foreground);
+  --overlay: #1a201c;
+  --overlay-foreground: var(--foreground);
+  --muted: #8f9b93;
+  --default: #232b26;
+  --default-foreground: var(--foreground);
+  --field-background: #1b221e;
+  --field-foreground: var(--foreground);
+  --field-placeholder: #6f7b73;
+  --border: #29332d;
+  --separator: #222b26;
+  --accent: #5fd08a;
+  --accent-foreground: #08140c;
+  --success: #5fd08a;
+  --success-foreground: #08140c;
+  --warning: #e3b341;
+  --danger: #ef6a5f;
+  --focus: #5fd08a;
+  --radius: 0.5rem;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* App tokens */
+  --app-bg: var(--background);
+  --panel: var(--surface);
+  --panel-2: var(--surface-secondary);
+  --line: var(--border);
+  --text-dim: var(--muted);
+  --board-light: #dfe4d7;
+  --board-dark: #5f7f6b;
+
+  --grade-best: #5fd08a;
+  --grade-excellent: #6fc3a8;
+  --grade-good: #9fb0a5;
+  --grade-inaccuracy: #e3b341;
+  --grade-mistake: #ec8a3f;
+  --grade-blunder: #ef5b52;
+  --grade-forced: #7f8c84;
+
+  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
+html,
+body,
 #root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+  min-height: 100%;
 }
 
 body {
   margin: 0;
+  background: var(--app-bg);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+:focus-visible {
+  outline-color: var(--focus);
 }
