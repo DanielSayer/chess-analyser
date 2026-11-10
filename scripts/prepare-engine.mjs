@@ -21,7 +21,7 @@ await writeFile(resolve(destination, 'NOTICE.txt'), [
   'Licensed under GNU GPL version 3. See COPYING.txt.',
   'Engine files are unmodified copies of stockfish@19.0.1.',
   'Complete corresponding source and build scripts:',
-  'https://github.com/nmrugg/stockfish.js/tree/19.0.1',
+  'https://github.com/nmrugg/stockfish.js/tree/v19.0.1',
   'https://www.npmjs.com/package/stockfish/v/19.0.1',
   '',
   ...Object.entries(hashes).map(([file, hash]) => `SHA-256 ${file}: ${hash}`),
