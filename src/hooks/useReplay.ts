@@ -10,6 +10,8 @@ export interface SquareMove {
 /** A line explored away from the played game. `fens[0]` is the branch point. */
 export interface Variation {
   baseIndex: number
+  /** Game position to show when leaving the line. */
+  returnIndex: number
   fens: string[]
   sans: string[]
   moves: SquareMove[]
@@ -29,6 +31,8 @@ export function useReplay(parsed: ParsedGame) {
   const lastIndex = fens.length - 1
   const [index, setIndex] = useState(0)
   const [variation, setVariation] = useState<Variation | null>(null)
+  // Long jumps skip piece animation, so pieces don't slide across the board.
+  const [jumped, setJumped] = useState(false)
 
   const fen = variation ? variation.fens[variation.cursor] : fens[index]
 
@@ -39,11 +43,14 @@ export function useReplay(parsed: ParsedGame) {
     : index > 0 ? uciSquares(parsed.plies[index - 1].uci) : null
 
   const goTo = useCallback((target: number) => {
+    const next = clamp(target, 0, lastIndex)
+    setJumped(variation !== null || Math.abs(next - index) > 1)
     setVariation(null)
-    setIndex(clamp(target, 0, lastIndex))
-  }, [lastIndex])
+    setIndex(next)
+  }, [lastIndex, variation, index])
 
   const step = useCallback((delta: number) => {
+    setJumped(false)
     if (variation) {
       setVariation({ ...variation, cursor: clamp(variation.cursor + delta, 0, variation.fens.length - 1) })
     } else {
@@ -52,18 +59,21 @@ export function useReplay(parsed: ParsedGame) {
   }, [variation, lastIndex])
 
   const toStart = useCallback(() => {
+    setJumped(true)
     if (variation) setVariation({ ...variation, cursor: 0 })
     else setIndex(0)
   }, [variation])
 
   const toEnd = useCallback(() => {
+    setJumped(true)
     if (variation) setVariation({ ...variation, cursor: variation.fens.length - 1 })
     else setIndex(lastIndex)
   }, [variation, lastIndex])
 
   const exitVariation = useCallback(() => {
     if (!variation) return
-    setIndex(variation.baseIndex)
+    setJumped(true)
+    setIndex(variation.returnIndex)
     setVariation(null)
   }, [variation])
 
@@ -78,10 +88,12 @@ export function useReplay(parsed: ParsedGame) {
     }
     const uci = `${from}${to}${move.promotion ?? ''}`
     if (!variation && index < lastIndex && parsed.plies[index].uci === uci) {
+      setJumped(false)
       setIndex(index + 1)
       return true
     }
     const square = { from, to }
+    setJumped(false)
     if (variation) {
       const keep = variation.cursor
       setVariation({
@@ -92,7 +104,7 @@ export function useReplay(parsed: ParsedGame) {
         cursor: keep + 1,
       })
     } else {
-      setVariation({ baseIndex: index, fens: [fen, chess.fen()], sans: [move.san], moves: [square], cursor: 1 })
+      setVariation({ baseIndex: index, returnIndex: index, fens: [fen, chess.fen()], sans: [move.san], moves: [square], cursor: 1 })
     }
     return true
   }, [fen, variation, index, lastIndex, parsed])
@@ -100,7 +112,7 @@ export function useReplay(parsed: ParsedGame) {
   /** Opens a SAN line from a game position as a variation, showing its first move. */
   const showLine = useCallback((baseIndex: number, sans: string[]) => {
     const chess = new Chess(fens[baseIndex])
-    const next: Variation = { baseIndex, fens: [chess.fen()], sans: [], moves: [], cursor: 0 }
+    const next: Variation = { baseIndex, returnIndex: index, fens: [chess.fen()], sans: [], moves: [], cursor: 0 }
     for (const san of sans) {
       try {
         const move = chess.move(san)
@@ -113,8 +125,9 @@ export function useReplay(parsed: ParsedGame) {
     }
     if (!next.sans.length) return
     next.cursor = 1
+    setJumped(true)
     setVariation(next)
-  }, [fens])
+  }, [fens, index])
 
-  return { fens, index, lastIndex, variation, fen, lastMove, goTo, step, toStart, toEnd, exitVariation, playMove, showLine, setVariation }
+  return { fens, index, lastIndex, variation, fen, lastMove, jumped, goTo, step, toStart, toEnd, exitVariation, playMove, showLine, setVariation }
 }

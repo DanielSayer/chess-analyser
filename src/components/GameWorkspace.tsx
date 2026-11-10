@@ -172,6 +172,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
                 orientation={orientation}
                 lastMove={replay.lastMove}
                 arrows={arrows}
+                animate={!replay.jumped}
                 onMove={replay.playMove}
               />
             </div>
@@ -205,6 +206,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
           </div>
         </div>
 
+        <div className="board-aligned">
         <MoveInsight
           parsed={parsed}
           review={review}
@@ -219,6 +221,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
             <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} />
           </section>
         )}
+        </div>
       </div>
 
       <aside className="workspace__panel" aria-label="Game review">

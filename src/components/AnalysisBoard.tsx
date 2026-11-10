@@ -17,6 +17,7 @@ interface Props {
   orientation: Side
   lastMove: SquareMove | null
   arrows: BoardArrow[]
+  animate: boolean
   onMove: (from: string, to: string) => boolean
 }
 
@@ -25,7 +26,7 @@ const SELECTED: CSSProperties = { background: 'rgba(95, 208, 138, 0.5)' }
 const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(10, 20, 14, 0.38) 22%, transparent 24%)' }
 const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(10, 20, 14, 0.38) 60%)' }
 
-export function AnalysisBoard({ fen, orientation, lastMove, arrows, onMove }: Props) {
+export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onMove }: Props) {
   const [selection, setSelection] = useState<{ fen: string; square: string } | null>(null)
   const chess = useMemo(() => new Chess(fen), [fen])
   const selected = selection?.fen === fen ? selection.square : null
@@ -52,7 +53,7 @@ export function AnalysisBoard({ fen, orientation, lastMove, arrows, onMove }: Pr
         id: 'analysis-board',
         position: fen,
         boardOrientation: orientation,
-        showAnimations: true,
+        showAnimations: animate,
         animationDurationInMs: 160,
         allowDrawingArrows: true,
         arrows: arrows.map(arrow => ({ startSquare: arrow.from, endSquare: arrow.to, color: arrow.color })),
