@@ -16,8 +16,15 @@ const INTERACTIVE = [
   '[role="tab"]', '[role="radiogroup"]', '[role="radio"]', '[role="menu"]', '[role="dialog"]', '[role="grid"]',
 ].join(',')
 
-export function isTypingTarget(target: EventTarget | null): boolean {
-  return target instanceof Element && target.closest(INTERACTIVE) !== null
+/** True when the focused element uses this key itself. */
+export function ownsKey(target: EventTarget | null, key: string): boolean {
+  if (!(target instanceof Element)) return false
+  const owner = target.closest(INTERACTIVE)
+  if (!owner) return false
+  // A vertical list only uses Up/Down, so Left/Right can still step through
+  // moves while a game in the list keeps focus.
+  const verticalList = owner.matches('[role="option"]') && owner.closest('[role="listbox"]:not([aria-orientation="horizontal"])') !== null
+  return !(verticalList && (key === 'ArrowLeft' || key === 'ArrowRight'))
 }
 
 export function useReplayKeys(handlers: ReplayKeyHandlers, enabled = true) {
@@ -27,7 +34,7 @@ export function useReplayKeys(handlers: ReplayKeyHandlers, enabled = true) {
   useEffect(() => {
     if (!enabled) return
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || isTypingTarget(event.target)) return
+      if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || ownsKey(event.target, event.key)) return
       // A modal dialog anywhere on the page owns the keyboard.
       if (document.querySelector('[role="dialog"][aria-modal="true"], [role="alertdialog"]')) return
       const actions: Record<string, (() => void) | undefined> = {

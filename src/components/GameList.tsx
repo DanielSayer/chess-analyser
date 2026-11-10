@@ -105,6 +105,7 @@ export function GameList({ username, games, selectedId, reviewedIds, onSelect }:
             if (game) onSelect(game)
           }}
           items={filtered}
+          dependencies={[reviewedIds, username]}
         >
           {game => <GameRow game={game} username={username} reviewed={reviewedIds.has(game.id)} />}
         </ListBox>
@@ -119,11 +120,11 @@ function GameRow({ game, username, reviewed }: { game: ImportedGame; username: s
   const outcome = outcomeFor(game, username)
   const text = `${OUTCOME_LABEL[outcome]} as ${side} against ${opponent.username}, ${gameDate(game.endTime)}`
   return (
-    <ListBox.Item id={game.id} textValue={text} className="game-row">
+    <ListBox.Item id={game.id} textValue={text} aria-label={`${text}${reviewed ? ", reviewed" : ""}`} className="game-row">
       <span className={`game-row__result is-${outcome}`} aria-hidden="true">{OUTCOME_LETTER[outcome]}</span>
       <span className="game-row__main">
         <span className="game-row__title">
-          <span className={`side-dot is-${side}`} aria-label={`You played ${side}`} />
+          <span className={`side-dot is-${side}`} aria-hidden="true" />
           <span className="game-row__opponent">{opponent.username}</span>
           {opponent.rating !== null && <span className="game-row__rating tabular">{opponent.rating}</span>}
         </span>

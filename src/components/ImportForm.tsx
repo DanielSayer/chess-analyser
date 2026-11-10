@@ -35,11 +35,11 @@ export function ImportForm({ busy, pendingUsername, initialValue, onImport, onCa
         <div className="import-form__row">
           <Input placeholder="Your username" autoComplete="off" spellCheck={false} autoCapitalize="none" />
           {busy ? (
-            <Button type="button" variant="secondary" onPress={onCancel} aria-label={`Cancel import for ${pendingUsername ?? 'player'}`}>
+            <Button key="cancel" type="button" variant="secondary" onPress={onCancel} aria-label={`Cancel import for ${pendingUsername ?? 'player'}`}>
               Cancel
             </Button>
           ) : (
-            <Button type="submit" variant="primary">Import</Button>
+            <Button key="import" type="submit" variant="primary">Import</Button>
           )}
         </div>
         <FieldError>{fieldError}</FieldError>
