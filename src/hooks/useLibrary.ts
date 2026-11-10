@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ImportedGame } from '../core'
 import {
   clearLocalData,
@@ -49,7 +49,9 @@ const initialState: LibraryState = {
 export function useLibrary() {
   const [state, setState] = useState<LibraryState>(initialState)
   const stateRef = useRef(state)
-  stateRef.current = state
+  useLayoutEffect(() => {
+    stateRef.current = state
+  })
   // Every network or storage operation takes a token. A newer operation makes
   // older results stale, so a slow response can never replace a newer player.
   const tokenRef = useRef(0)

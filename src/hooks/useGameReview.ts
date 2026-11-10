@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { AnalysisPreset, AnalysisProgress, GameReview, ImportedGame } from '../core'
 import { analyseGame, loadReview, saveReview } from '../core'
 import { errorMessage, isAbortError } from '../ui/format'
@@ -40,7 +40,9 @@ export function useGameReview(game: ImportedGame, { cached, onComplete, onSaved,
   const runRef = useRef<{ id: number; controller: AbortController } | null>(null)
   const nextRun = useRef(0)
   const callbacks = useRef({ onComplete, onSaved, onStorageIssue })
-  callbacks.current = { onComplete, onSaved, onStorageIssue }
+  useLayoutEffect(() => {
+    callbacks.current = { onComplete, onSaved, onStorageIssue }
+  })
 
   useEffect(() => {
     if (cached) return

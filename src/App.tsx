@@ -1,6 +1,6 @@
 import { Alert, Button, Skeleton, Spinner } from '@heroui/react'
 import { History, RotateCw } from 'lucide-react'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Chessboard } from 'react-chessboard'
 import './App.css'
 import { AboutDialog } from './components/AboutDialog'
@@ -17,7 +17,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<'games' | 'board'>('games')
   // Completed reviews from this session, so they survive game switches even when storage fails.
-  const reviews = useRef(new Map<string, GameReview>())
+  const [reviews, setReviews] = useState<ReadonlyMap<string, GameReview>>(new Map())
 
   const selected = state.games.find(game => game.id === selectedId) ?? null
   const busy = state.status === 'importing'
@@ -28,13 +28,13 @@ export default function App() {
   }, [])
 
   const onReviewComplete = useCallback((review: GameReview) => {
-    reviews.current.set(review.gameId, review)
+    setReviews(current => new Map(current).set(review.gameId, review))
   }, [])
 
   const clearAll = useCallback(async () => {
     const error = await library.clearAll()
     if (!error) {
-      reviews.current.clear()
+      setReviews(new Map())
       setSelectedId(null)
       setView('games')
     }
@@ -42,7 +42,7 @@ export default function App() {
   }, [library])
 
   const cachedFor = (game: ImportedGame) => {
-    const review = reviews.current.get(game.id)
+    const review = reviews.get(game.id)
     return review && review.pgn === game.pgn ? review : null
   }
 

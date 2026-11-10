@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useLayoutEffect, useRef } from 'react'
 
 export interface ReplayKeyHandlers {
   prev: () => void
@@ -29,7 +29,9 @@ export function ownsKey(target: EventTarget | null, key: string): boolean {
 
 export function useReplayKeys(handlers: ReplayKeyHandlers, enabled = true) {
   const ref = useRef(handlers)
-  ref.current = handlers
+  useLayoutEffect(() => {
+    ref.current = handlers
+  })
 
   useEffect(() => {
     if (!enabled) return

@@ -177,6 +177,29 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByLabel('Review progress')).toHaveCount(0)
   })
 
+  test('keeps working in memory when browser storage is unavailable', async ({ page }) => {
+    await page.addInitScript(() => {
+      Object.defineProperty(window, 'indexedDB', { get() { throw new DOMException('Blocked', 'SecurityError') } })
+    })
+    await mockChessCom(page)
+    await page.goto('/')
+    await importPlayer(page)
+    await expect(page.getByRole('option')).toHaveCount(4)
+    await expect(page.getByText(/Browser storage is unavailable/)).toBeVisible()
+
+    await gameOption(page, 'hasty_knight').click()
+    await page.getByRole('radio', { name: 'Quick' }).click()
+    await page.getByRole('button', { name: 'Review game' }).click()
+    await expect(page.getByTestId('accuracy-white')).toBeVisible({ timeout: 60_000 })
+    const accuracy = await page.getByTestId('accuracy-white').textContent()
+
+    // The completed review is still held for this session after switching games.
+    await gameOption(page, 'rook_lift').click()
+    await expect(page.getByRole('button', { name: 'Review game' })).toBeVisible()
+    await gameOption(page, 'hasty_knight').click()
+    await expect(page.getByTestId('accuracy-white')).toHaveText(accuracy!)
+  })
+
   for (const viewport of [{ name: 'desktop', width: 1440, height: 900 }, { name: 'mobile', width: 390, height: 844 }]) {
     test(`has no horizontal overflow on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport)
