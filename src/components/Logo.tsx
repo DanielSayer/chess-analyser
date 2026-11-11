@@ -1,12 +1,7 @@
 export function Logo() {
   return (
     <svg className="logo" viewBox="0 0 32 32" width="28" height="28" aria-hidden="true">
-      <rect width="32" height="32" rx="7" fill="#1b221e" />
-      <rect x="6" y="6" width="10" height="10" fill="var(--board-light)" />
-      <rect x="16" y="6" width="10" height="10" fill="#3f5c4b" />
-      <rect x="6" y="16" width="10" height="10" fill="#3f5c4b" />
-      <rect x="16" y="16" width="10" height="10" fill="var(--board-light)" />
-      <path d="M4 22.5 10 19l5 2.5 6-9 7 3" fill="none" stroke="var(--accent)" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M7 5h4v5h3V5h4v5h3V5h4v10l-4 3 2 7H9l2-7-4-3V5Zm1 23h16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

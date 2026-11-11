@@ -22,7 +22,7 @@ interface Props {
 }
 
 const LAST_MOVE: CSSProperties = { background: 'rgba(214, 196, 92, 0.42)' }
-const SELECTED: CSSProperties = { background: 'rgba(95, 208, 138, 0.5)' }
+const SELECTED: CSSProperties = { background: 'rgba(244, 189, 36, 0.5)' }
 const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(10, 20, 14, 0.38) 22%, transparent 24%)' }
 const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(10, 20, 14, 0.38) 60%)' }
 
@@ -64,7 +64,7 @@ export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onM
         lightSquareNotationStyle: { color: 'var(--board-dark)', fontWeight: 600 },
         darkSquareNotationStyle: { color: 'var(--board-light)', fontWeight: 600 },
         boardStyle: { borderRadius: 6, overflow: 'hidden' },
-        dropSquareStyle: { boxShadow: 'inset 0 0 0 3px rgba(95, 208, 138, 0.75)' },
+        dropSquareStyle: { boxShadow: 'inset 0 0 0 3px rgba(244, 189, 36, 0.75)' },
         canDragPiece: ({ piece }) => piece.pieceType[0] === turn,
         onPieceDrop: ({ sourceSquare, targetSquare }) => {
           setSelection(null)

@@ -4,7 +4,7 @@ This is a local-first React + TypeScript + Vite application. Import completed st
 
 ## Working conventions
 
-- Delegate all design and UI implementation work to Claude Opus 5.5 using the T3 delegate tool. Do not silently substitute another model.
+- Implement design and UI work directly. The user explicitly revoked Opus delegation on 11 November 2026.
 - Prefer HeroUI v3. Take broad visual inspiration from Chessigma, without copying its code, artwork, branding or exact layout.
 - Make focused conventional commits regularly. The user has authorised committing the UI as part of this task.
 - Keep the core services independent of React. `src/core/index.ts` is the UI integration contract.

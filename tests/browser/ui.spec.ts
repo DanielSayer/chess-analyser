@@ -11,6 +11,7 @@ const SHOTS = '.artifacts/screens'
 
 async function importPlayer(page: Page, username = PLAYER) {
   const field = page.getByLabel('Chess.com username')
+  if (!(await field.isVisible())) await page.getByRole('button', { name: 'Change player', exact: true }).click()
   await field.fill(username)
   await page.getByRole('button', { name: 'Import', exact: true }).click()
 }
@@ -23,7 +24,8 @@ test.describe('mocked Chess.com import', () => {
   test('imports, reviews with the real engine, replays and explores a line', async ({ page }) => {
     await mockChessCom(page)
     await page.goto('/')
-    await expect(page.getByText('Import a player to get started.')).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Every game has something to show you.' })).toBeVisible()
+    await expect(page.getByTestId('board')).toHaveCount(0)
     await importPlayer(page)
 
     await expect(page.getByRole('heading', { name: PLAYER })).toBeVisible()
@@ -31,6 +33,7 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByRole('button', { name: /Load older games/ })).toBeVisible()
 
     // Filters
+    await page.getByRole('button', { name: 'Filters', exact: true }).click()
     await page.getByRole('radio', { name: 'Won' }).click()
     await expect(page.getByRole('option')).toHaveCount(2)
     await page.getByLabel('Filter by opponent or opening').fill('hasty')
@@ -46,7 +49,10 @@ test.describe('mocked Chess.com import', () => {
     await expect(position).toHaveText('Start')
     await page.keyboard.press('ArrowRight')
     await expect(position).toHaveText('1. e4')
+    await page.getByRole('button', { name: 'Your games', exact: true }).click()
+    await page.getByRole('button', { name: 'Change player', exact: true }).click()
     await page.getByLabel('Chess.com username').press('ArrowRight')
+    await page.getByRole('button', { name: 'Game review', exact: true }).click()
     await expect(position).toHaveText('1. e4')
     await page.getByRole('heading', { name: /Italian Game/ }).click()
     await page.keyboard.press('End')
@@ -57,7 +63,9 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByTestId('accuracy-white')).toHaveText(/^\d+\.\d$/, { timeout: 60_000 })
     await expect(page.getByTestId('accuracy-black')).toHaveText(/^\d+\.\d$/)
     await expect(page.getByRole('heading', { name: 'Critical moments' })).toBeVisible()
+    await page.getByRole('button', { name: 'Your games', exact: true }).click()
     await expect(page.getByRole('option', { name: /against hasty_knight.*, reviewed/ })).toBeVisible()
+    await page.getByRole('button', { name: 'Game review', exact: true }).click()
 
     // Black's 3... Nf6 allowed mate, so it is a critical moment.
     await page.getByRole('button', { name: /3… Nf6/ }).click()
@@ -94,7 +102,7 @@ test.describe('mocked Chess.com import', () => {
     const before = requests.length
     await page.reload()
     await expect(page.getByRole('heading', { name: PLAYER })).toBeVisible()
-    await expect(page.getByText('saved on this device')).toBeVisible()
+    await expect(page.getByText('Saved on this device')).toBeVisible()
     await expect(page.getByRole('option')).toHaveCount(4)
     await gameOption(page, 'hasty_knight').click()
     await expect(page.getByTestId('accuracy-white')).toHaveText(accuracy!)
@@ -171,6 +179,7 @@ test.describe('mocked Chess.com import', () => {
 
     // Switching games during a run cancels it, and the new game starts clean.
     await page.getByRole('button', { name: 'Re-run' }).click()
+    await page.getByRole('button', { name: 'Your games', exact: true }).click()
     await gameOption(page, 'rook_lift').click()
     await expect(page.getByRole('heading', { name: /Sicilian Defense/ })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Review game' })).toBeVisible()
@@ -194,13 +203,15 @@ test.describe('mocked Chess.com import', () => {
     const accuracy = await page.getByTestId('accuracy-white').textContent()
 
     // The completed review is still held for this session after switching games.
+    await page.getByRole('button', { name: 'Your games', exact: true }).click()
     await gameOption(page, 'rook_lift').click()
     await expect(page.getByRole('button', { name: 'Review game' })).toBeVisible()
+    await page.getByRole('button', { name: 'Your games', exact: true }).click()
     await gameOption(page, 'hasty_knight').click()
     await expect(page.getByTestId('accuracy-white')).toHaveText(accuracy!)
   })
 
-  for (const viewport of [{ name: 'desktop', width: 1440, height: 900 }, { name: 'mobile', width: 390, height: 844 }]) {
+  for (const viewport of [{ name: 'wide', width: 1910, height: 1067 }, { name: 'desktop', width: 1440, height: 900 }, { name: 'tablet', width: 1024, height: 900 }, { name: 'mobile', width: 390, height: 844 }]) {
     test(`has no horizontal overflow on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport)
       await mockChessCom(page)

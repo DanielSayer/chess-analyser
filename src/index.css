@@ -1,85 +1,56 @@
-@import "tailwindcss";
+﻿@import "tailwindcss";
 @import "@heroui/styles";
 
-/*
- * Chess Analyser theme. A dark, low-glare workspace with one green accent.
- * Overrides HeroUI's dark tokens so every component picks up the palette.
- */
-:root,
-.dark,
-[data-theme="dark"] {
+:root, .dark, [data-theme="dark"] {
   color-scheme: dark;
-
-  --background: #0e1210;
-  --foreground: #e4e9e5;
-  --surface: #151a17;
+  --background: #181818;
+  --foreground: #f1f1f1;
+  --surface: #202020;
   --surface-foreground: var(--foreground);
-  --surface-secondary: #1b221e;
+  --surface-secondary: #272727;
   --surface-secondary-foreground: var(--foreground);
-  --surface-tertiary: #222a25;
+  --surface-tertiary: #303030;
   --surface-tertiary-foreground: var(--foreground);
-  --overlay: #1a201c;
+  --overlay: #242424;
   --overlay-foreground: var(--foreground);
-  --muted: #8f9b93;
-  --default: #232b26;
+  --muted: #a4a4a4;
+  --default: #2a2a2a;
   --default-foreground: var(--foreground);
-  --field-background: #1b221e;
+  --field-background: #242424;
   --field-foreground: var(--foreground);
-  --field-placeholder: #6f7b73;
-  --border: #29332d;
-  --separator: #222b26;
-  --accent: #5fd08a;
-  --accent-foreground: #08140c;
-  --success: #5fd08a;
-  --success-foreground: #08140c;
-  --warning: #e3b341;
-  --danger: #ef6a5f;
-  --focus: #5fd08a;
-  --radius: 0.5rem;
-
-  /* App tokens */
+  --field-placeholder: #898989;
+  --border: #343434;
+  --separator: #303030;
+  --accent: #f4bd24;
+  --accent-foreground: #1b1605;
+  --success: #16b68b;
+  --success-foreground: #061b14;
+  --warning: #e7b744;
+  --danger: #d57670;
+  --focus: #f4bd24;
+  --radius: 0.6rem;
   --app-bg: var(--background);
   --panel: var(--surface);
   --panel-2: var(--surface-secondary);
   --line: var(--border);
   --text-dim: var(--muted);
-  --board-light: #dfe4d7;
-  --board-dark: #5f7f6b;
-
-  --grade-best: #5fd08a;
-  --grade-excellent: #6fc3a8;
-  --grade-good: #9fb0a5;
-  --grade-inaccuracy: #e3b341;
-  --grade-mistake: #ec8a3f;
-  --grade-blunder: #ef5b52;
-  --grade-forced: #7f8c84;
-
-  --font-sans: "Inter", "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "Cascadia Mono", ui-monospace, Consolas, monospace;
+  --board-light: #e0e2eb;
+  --board-dark: #414c62;
+  --grade-best: #16b68b;
+  --grade-excellent: #65baac;
+  --grade-good: #a0aaae;
+  --grade-inaccuracy: #e7b744;
+  --grade-mistake: #e5954d;
+  --grade-blunder: #d57670;
+  --grade-forced: #8b8b8b;
+  --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  --font-mono: "Cascadia Mono", ui-monospace, Consolas, monospace;
 }
-
-html,
-body,
-#root {
-  min-height: 100%;
-}
-
-body {
-  margin: 0;
-  background: var(--app-bg);
-  color: var(--foreground);
-  font-family: var(--font-sans);
-  font-size: 14px;
-  line-height: 1.45;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-}
-
-.tabular {
-  font-variant-numeric: tabular-nums;
-}
-
-:focus-visible {
-  outline-color: var(--focus);
-}
+html, body, #root { min-height: 100%; }
+body { margin: 0; background: var(--app-bg); color: var(--foreground); font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+.tabular { font-variant-numeric: tabular-nums; }
+:focus-visible { outline-color: var(--focus); }
+::selection { background: #f4bd2444; }

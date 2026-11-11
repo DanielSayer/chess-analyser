@@ -37,22 +37,15 @@ export function ReviewSummary({ game, review, index, onSelect }: Props) {
   return (
     <div className="summary">
       <section className="summary__accuracy" aria-labelledby="accuracy-heading">
-        <div className="section-heading">
-          <h3 id="accuracy-heading">Accuracy</h3>
-          <AccuracyNote />
-        </div>
-        <div className="accuracy-pair">
+        <div className="report-players">
           {sides.map(side => (
-            <div key={side} className={`accuracy-card is-${side}`}>
-              <span className="accuracy-card__name">
-                <span className={`side-dot is-${side}`} aria-hidden="true" />
-                {game[side].username}
-              </span>
-              <span className="accuracy-card__value tabular" data-testid={`accuracy-${side}`}>
-                {review[side].accuracy === null ? '–' : review[side].accuracy!.toFixed(1)}
-              </span>
-            </div>
+            <div key={side}><span className="report-player-avatar">{game[side].username[0].toUpperCase()}</span><strong><span className={`side-dot is-${side}`} aria-hidden="true" /> {game[side].username}</strong><span>{game[side].rating}</span></div>
           ))}
+        </div>
+        <div className="accuracy-comparison">
+          <span className="accuracy-value tabular" data-testid="accuracy-white">{review.white.accuracy?.toFixed(1) ?? '—'}</span>
+          <div className="section-heading"><h3 id="accuracy-heading">Accuracy</h3><AccuracyNote /></div>
+          <span className="accuracy-value tabular" data-testid="accuracy-black">{review.black.accuracy?.toFixed(1) ?? '—'}</span>
         </div>
       </section>
 
@@ -61,16 +54,16 @@ export function ReviewSummary({ game, review, index, onSelect }: Props) {
         <table className="grade-table">
           <thead>
             <tr>
+              <th scope="col"><span className="sr-only">{game.white.username}</span></th>
               <th scope="col"><span className="sr-only">Grade</span></th>
-              <th scope="col" className="tabular">{game.white.username}</th>
-              <th scope="col" className="tabular">{game.black.username}</th>
+              <th scope="col"><span className="sr-only">{game.black.username}</span></th>
             </tr>
           </thead>
           <tbody>
             {GRADE_ORDER.map(grade => (
               <tr key={grade} className={review.white.counts[grade] + review.black.counts[grade] === 0 ? 'is-zero' : ''}>
-                <th scope="row"><GradeBadge grade={grade} size="sm" /> {GRADES[grade].label}</th>
                 <td className="tabular">{review.white.counts[grade]}</td>
+                <th scope="row"><span><GradeBadge grade={grade} size="sm" /> {GRADES[grade].label}</span></th>
                 <td className="tabular">{review.black.counts[grade]}</td>
               </tr>
             ))}

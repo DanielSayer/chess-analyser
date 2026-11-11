@@ -1,6 +1,6 @@
 import { Alert, Button, ButtonGroup, Link, ProgressBar, Spinner, Tabs, ToggleButton, ToggleButtonGroup } from '@heroui/react'
 import {
-  ArrowLeft, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
+  ArrowLeft, BarChart3, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { AnalysisPreset, GameReview, ImportedGame, ParsedGame, Side } from '../core'
@@ -28,9 +28,10 @@ interface Props {
   onReviewSaved: (gameId: string) => void
   onStorageIssue: () => void
   onBack?: () => void
+  isActive?: boolean
 }
 
-const BEST_ARROW = 'rgba(95, 208, 138, 0.85)'
+const BEST_ARROW = 'rgba(45, 187, 162, 0.8)'
 const PRESET_HINT: Record<AnalysisPreset, string> = {
   quick: 'Fastest, rough grades',
   standard: 'Balanced speed and accuracy',
@@ -111,7 +112,7 @@ function PlayerStrip({ game, side, clock, accuracy, toMove }: {
   )
 }
 
-function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSaved, onStorageIssue, onBack, parsed }: Props & { parsed: ParsedGame }) {
+function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSaved, onStorageIssue, onBack, parsed, isActive = true }: Props & { parsed: ParsedGame }) {
   const analysis = useGameReview(game, { cached: cachedReview, onComplete: onReviewComplete, onSaved: onReviewSaved, onStorageIssue })
   const replay = useReplay(parsed)
   const [flipped, setFlipped] = useState(false)
@@ -125,7 +126,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
   const orientation: Side = flipped ? (viewer === 'white' ? 'black' : 'white') : viewer
   const { variation, index } = replay
 
-  const lines = usePositionLines(variation ? replay.fen : null, variation !== null && !running)
+  const lines = usePositionLines(variation ? replay.fen : null, isActive && variation !== null && !running)
 
   useReplayKeys({
     prev: () => replay.step(-1),
@@ -134,7 +135,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
     end: replay.toEnd,
     flip: () => setFlipped(f => !f),
     escape: replay.exitVariation,
-  })
+  }, isActive)
 
   const evaluation = variation
     ? variation.cursor === 0 && review ? review.positions[variation.baseIndex] : lines.evaluation
@@ -206,7 +207,14 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
           </div>
         </div>
 
-        <div className="board-aligned">
+      </div>
+
+      <aside className="workspace__panel" aria-label="Game review">
+        <header className="report-heading"><span className="report-heading__icon"><BarChart3 size={24} /></span><div><h2>Game review</h2><p>{running ? 'Taking a closer look at your moves.' : review ? 'Find the moments that mattered.' : 'Ready to take a closer look?'}</p></div></header>
+        <div className="report-graph">
+          {review ? <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} /> : <div className="report-graph__empty"><span /><p>Evaluation appears after your review</p></div>}
+        </div>
+        {(review || variation || index > 0) && <div className="report-insight">
         <MoveInsight
           parsed={parsed}
           review={review}
@@ -216,15 +224,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
           running={running}
         />
 
-        {review && (
-          <section className="graph-card" aria-label="Evaluation over the game">
-            <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} />
-          </section>
-        )}
-        </div>
-      </div>
-
-      <aside className="workspace__panel" aria-label="Game review">
+        </div>}
         <section className="analysis-card">
           {analysis.run ? (
             <div className="analysis-card__progress">
@@ -303,9 +303,10 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
             ) : analysis.loadingSaved ? (
               <div className="panel-empty"><Spinner size="sm" color="current" /> Checking for a saved review</div>
             ) : (
-              <div className="panel-empty">
-                <p className="panel-empty__title">{running ? 'Review in progress' : 'Not reviewed yet'}</p>
-                <p>Accuracy, move grades and critical moments appear here once the review finishes.</p>
+              <div className="report-preview">
+                <div className="report-players">{(['white', 'black'] as Side[]).map(side => <div key={side}><span className="report-player-avatar">{game[side].username[0].toUpperCase()}</span><strong>{game[side].username}</strong><span>{game[side].rating}</span></div>)}</div>
+                <div className="report-preview__accuracy"><span>—</span><p>Accuracy</p><span>—</span></div>
+                <p className="panel-empty__title">{running ? 'Analysing your game…' : 'Your review starts here'}</p><p className="muted">See your accuracy, best moves and the moments to learn from.</p>
               </div>
             )}
           </Tabs.Panel>
