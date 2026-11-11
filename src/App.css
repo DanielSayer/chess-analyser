@@ -58,7 +58,7 @@
 .recent-result:hover { filter: brightness(1.2); }
 .recent-result[aria-pressed="true"] { border-color: #ffe37a; box-shadow: 0 0 0 1px #ffe37a; }
 .library-actions { display: grid; grid-template-columns: 1fr 1.35fr 1fr; gap: 10px; }
-.library-actions > .button { min-height: 45px; font-size: 14px; gap: 8px; }
+.library-actions > .button { width: 100%; min-height: 45px; font-size: 14px; gap: 8px; }
 .library-actions > .button[aria-expanded="true"] { border-color: #b99b44; color: #f8d570; }
 .library-caption { display: flex; justify-content: space-between; gap: 14px; font-size: 11px; color: #939393; margin-top: 1px; }
 .storage-note { font-size: 12px; color: #d7b76a; padding: 12px 14px; border: 1px solid #51452a; border-radius: 8px; background: #27231a; }
@@ -80,7 +80,7 @@
 .game-row::before { content: ''; position: absolute; left: 0; top: 16px; bottom: 16px; width: 4px; border-radius: 3px; background: #999; }
 .game-row.is-win::before { background: #16b68b; }
 .game-row.is-loss::before { background: #bd6e67; }
-.game-row[data-selected="true"] { background: #292720; }
+.game-row[aria-current="true"] { background: #292720; }
 .game-row:hover, .game-row[data-hovered="true"] { background: #242424; }
 .opponent-avatar { display: grid; place-items: center; flex: none; width: 34px; height: 34px; border-radius: 50%; background: #353535; color: #eee; font-size: 13px; font-weight: 600; }
 .game-row__main { display: grid; min-width: 0; gap: 3px; }

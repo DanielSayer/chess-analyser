@@ -60,7 +60,7 @@ export function GameLibrary({ library, selectedId, reviews, onSelect }: Props) {
         </div>
         <div className="library-caption"><span>{state.synced ? 'Newest games first' : 'Saved on this device'}</span><span>{loadingOlder ? 'Loading older games' : state.remainingArchives === null ? 'Refresh to find older games' : remaining > 0 ? `${remaining} ${remaining === 1 ? 'month' : 'months'} left to import` : 'All archived months are loaded.'}</span></div>
         {state.olderError && <Alert status="danger"><Alert.Indicator /><Alert.Content><Alert.Description>{state.olderError}</Alert.Description></Alert.Content></Alert>}
-        <GameList username={state.username} games={state.games} selectedId={selectedId} reviewedIds={state.reviewedIds} reviews={reviews} filtersVisible={filters} onSelect={onSelect} />
+        <GameList key={state.username} username={state.username} games={state.games} selectedId={selectedId} reviewedIds={state.reviewedIds} reviews={reviews} filtersVisible={filters} onSelect={onSelect} />
       </>}
     </div>
   )

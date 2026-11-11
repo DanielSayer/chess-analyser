@@ -1,33 +1,34 @@
-# Interface notes
+﻿# Interface notes
 
-The app is one workspace with the board in the middle. There is no landing page. The first screen is the import form and an empty board.
+Updated 11 November 2026 from the user's supplied Chessigma screenshots. The app has two distinct screens: a centred game library and a board-focused review. Design work is implemented directly, without delegates.
 
 ## Layout
 
-- Wide screens use three columns. Games sit on the left (320px), the board column fills the middle, and the review panel (360px) sits on the right.
-- From 1180px to 1280px the review panel narrows to 320px. Below 1180px it moves under the board.
-- Below 860px the app shows one view at a time. Picking a game switches to the board, and a "Games" button goes back.
-- Board size follows the viewport height (`--board-col` in `App.css`), so the replay controls stay visible on a 900px-tall screen.
+- The navigation rail holds Your games, Game review and About. It is 216px wide on large screens, 190px at smaller desktop widths, and collapses to icons below 1150px.
+- The library is a centred column, up to 720px wide. It contains the player card, recent-result strip, three main actions and date-grouped games. Import and filters expand in place. There is no decorative empty chessboard.
+- Games show an opponent initial, rating, colour played, time control, opening and move count. The result is a coloured edge. The Analyse action opens the review. Dates and daily result counts belong to each group.
+- The review uses a large board on the left and a report on the right. The report contains its evaluation graph, Summary and Moves tabs, player comparison, critical moments and review controls. No game-list sidebar competes with the board.
+- Board size follows the available width and viewport height. The report is 370px wide, narrowing to 330px and 310px on smaller desktops. Below 980px it sits underneath the board.
+- Below 700px navigation becomes a compact top bar. Library rows, import controls and the board fit a narrow screen without horizontal scrolling.
 
 ## Visual language
 
-- Dark green-grey surfaces (`#0e1210` to `#222a25`) and one accent green (`#5fd08a`). The theme overrides HeroUI's dark tokens in `src/index.css`, so HeroUI components pick up the palette.
-- Board squares are a muted sage pair (`--board-light`, `--board-dark`). Pieces are react-chessboard's default set. No Chess.com or Chessigma artwork, icons or sounds are used.
-- Grade colours run green to red (`--grade-*`). Badges use plain glyphs (★ ✓ • ?! ? ?? →) so they read without colour.
-- Section labels are small uppercase captions. Numbers use tabular figures.
+- Neutral charcoal surfaces replace the old green-grey palette. Primary actions and selected navigation use a warm yellow accent with a short bottom shadow.
+- The board uses pale grey and slate squares. Pieces are react-chessboard's standard set. Branding is a simple original rook mark.
+- Green, red and grey distinguish game results. Move-grade badges keep their distinct colours and text labels.
+- HeroUI supplies accessible form controls, buttons, tabs, dialogs, progress and listbox interactions. Application CSS controls the overall layout and hierarchy.
+- The reference's coaching, pricing, account and unrelated training sections are outside this app's scope.
 
-## Components
+## Behaviour
 
-HeroUI v3 supplies the TextField, Button, ButtonGroup, ToggleButton(Group), SearchField, Select, ListBox, Tabs, ProgressBar, Alert, Spinner, Skeleton, Popover, Modal, AlertDialog, Link and Kbd. The board, evaluation bar and graph are custom because HeroUI has nothing equivalent.
+- Returning to the library keeps the selected game and completed review in memory. Game review reopens the same position. Opening another game cancels the previous game's active review.
+- Replay shortcuts only run while the review screen is active, and ignore text fields and other widgets that own those keys. Hidden reviews cannot intercept keys on the library page.
+- Finishing or loading a review scrolls its report to the top so the new results are visible.
+- Trying a move starts an explored line. Changing that position cancels the old position search. Exploration pauses while a full game review runs or the review screen is hidden.
+- Changing the player resets game filters. Browser-storage failures still fall back to the session's in-memory reviews.
 
-## Behaviour worth knowing
+## Verification
 
-- Keyboard replay (← → Home End F Esc) ignores text fields, sliders, tabs, radio groups and open dialogs. Left and Right still work while a row in the games list has focus, because that list only uses Up and Down.
-- Dragging or clicking a piece starts an explored line. Engine lines for that position come from one `analysePosition` call at a time. Each new position aborts the last search, which terminates its worker. Explored-line analysis pauses while a full review runs.
-- "Show line" opens the engine's preferred line from before the selected move. "Back to game" returns to the move you were inspecting.
-- Accuracy is explained in a popover next to the accuracy heading and in the About dialog. The normal flow does not show implementation details.
-- Completed reviews are also kept in memory for the session. If browser storage fails, switching games does not lose them.
+The browser suite covers the full mocked import and real-engine review flow, returning to the library and review, reload persistence, import errors, older months, stale imports, cancelled reviews and unavailable storage. Layout screenshots are captured at 1910, 1440, 1024 and 390 pixels. Test imports are synthetic; the Stockfish worker is real.
 
-## Tests
-
-`tests/browser/ui.spec.ts` uses mocked Chess.com responses from `tests/fixtures/ui-games.ts`. Those games are synthetic. Analysis in those tests uses the real Stockfish worker. Screenshots go to `.artifacts/screens/`, which Git ignores.
+A separate live check uses the public Chess.com username supplied in the user's screenshots. Screenshots and the API responses' status summary are saved under ignored `.artifacts/`.

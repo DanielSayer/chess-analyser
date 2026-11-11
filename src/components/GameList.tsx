@@ -76,8 +76,8 @@ export function GameList({ username, games, selectedId, reviewedIds, reviews, fi
           const draws = entries.filter(game => outcomeFor(game, username) === 'draw').length
           return <section className="game-day" key={label}>
             <header className="game-day__heading"><h3>{label}</h3><span className="day-record tabular"><span>{wins}W</span><span>{entries.length - wins - draws}L</span><span>{draws}D</span></span></header>
-            <ListBox aria-label={`${label} games for ${username}`} className="game-list__items" selectionMode="single" disallowEmptySelection selectedKeys={selectedId ? [selectedId] : []} onAction={id => { const game = entries.find(item => item.id === id); if (game) onSelect(game) }} items={entries} dependencies={[reviewedIds, username, reviews]}>
-              {game => <GameRow game={game} username={username} reviewed={reviewedIds.has(game.id)} review={reviews.get(game.id)} />}
+            <ListBox aria-label={`${label} games for ${username}`} className="game-list__items" selectionMode="none" onAction={id => { const game = entries.find(item => item.id === id); if (game) onSelect(game) }} items={entries} dependencies={[reviewedIds, username, reviews, selectedId]}>
+              {game => <GameRow game={game} username={username} reviewed={reviewedIds.has(game.id)} review={reviews.get(game.id)} current={selectedId === game.id} />}
             </ListBox>
           </section>
         })}
@@ -86,7 +86,7 @@ export function GameList({ username, games, selectedId, reviewedIds, reviews, fi
   )
 }
 
-function GameRow({ game, username, reviewed, review }: { game: ImportedGame; username: string; reviewed: boolean; review?: GameReview }) {
+function GameRow({ game, username, reviewed, review, current }: { game: ImportedGame; username: string; reviewed: boolean; review?: GameReview; current: boolean }) {
   const side = playerSide(game, username)
   const opponent = game[side === 'white' ? 'black' : 'white']
   const outcome = outcomeFor(game, username)
@@ -94,7 +94,7 @@ function GameRow({ game, username, reviewed, review }: { game: ImportedGame; use
   const score = review?.pgn === game.pgn ? review[side].accuracy : null
   const moveCount = game.pgn.replace(/\{[^}]*\}/g, '').replace(/\[[^\]]*\]/g, '').match(/\b\d+\.(?!\.)/g)?.length ?? 0
   return (
-    <ListBox.Item id={game.id} textValue={text} aria-label={`${text}${reviewed ? ', reviewed' : ''}`} className={`game-row is-${outcome}`}>
+    <ListBox.Item id={game.id} textValue={text} aria-label={`${text}${reviewed ? ', reviewed' : ''}`} aria-current={current ? 'true' : undefined} className={`game-row is-${outcome}`}>
       <span className="opponent-avatar" aria-hidden="true">{opponent.username[0].toUpperCase()}</span>
       <span className="game-row__main">
         <span className="game-row__title"><span className="game-row__opponent">{opponent.username}</span>{opponent.rating !== null && <span className="game-row__rating tabular">{opponent.rating}</span>}</span>

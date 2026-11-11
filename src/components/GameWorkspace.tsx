@@ -2,7 +2,7 @@ import { Alert, Button, ButtonGroup, Link, ProgressBar, Spinner, Tabs, ToggleBut
 import {
   ArrowLeft, BarChart3, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AnalysisPreset, GameReview, ImportedGame, ParsedGame, Side } from '../core'
 import { PRESETS, lineToSan, parseGame, sideForUsername } from '../core'
 import { useGameReview } from '../hooks/useGameReview'
@@ -119,9 +119,13 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
   const [showBest, setShowBest] = useState(true)
   const [preset, setPreset] = useState<AnalysisPreset>(cachedReview?.preset ?? 'standard')
   const [tab, setTab] = useState<'summary' | 'moves'>('summary')
+  const panelRef = useRef<HTMLElement>(null)
 
   const review = analysis.review
   const running = analysis.run !== null
+  useEffect(() => {
+    if (review) panelRef.current?.scrollTo({ top: 0 })
+  }, [review])
   const viewer = sideForUsername(game, username)
   const orientation: Side = flipped ? (viewer === 'white' ? 'black' : 'white') : viewer
   const { variation, index } = replay
@@ -209,7 +213,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
 
       </div>
 
-      <aside className="workspace__panel" aria-label="Game review">
+      <aside ref={panelRef} className="workspace__panel" aria-label="Game review">
         <header className="report-heading"><span className="report-heading__icon"><BarChart3 size={24} /></span><div><h2>Game review</h2><p>{running ? 'Taking a closer look at your moves.' : review ? 'Find the moments that mattered.' : 'Ready to take a closer look?'}</p></div></header>
         <div className="report-graph">
           {review ? <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} /> : <div className="report-graph__empty"><span /><p>Evaluation appears after your review</p></div>}

@@ -1,5 +1,23 @@
 # Verification, 10 November 2026
 
+## UI correction, 11 November 2026
+
+The library and review were rebuilt directly from the user's reference screenshots. The permanent game-list sidebar and decorative empty board were replaced with a centred library, compact navigation and a separate board-focused review. Colours, action styling, board palette and player comparisons now follow the supplied visual direction. No delegates were used for this correction.
+
+`npm run check` passed with strict TypeScript, 23 unit tests, the production build and 12 Chromium browser tests. The updated tests exercise returning between library and review, switching games, preserving reviews, errors and cancellation. Screenshot and overflow checks cover 1910, 1440, 1024 and 390 pixel widths.
+
+A separate production-build check imported all 79 currently returned standard-chess games for the public username in the supplied screenshots. The latest game, against `godrockagain`, completed a real local Stockfish review. Reloading restored the games and completed review without additional API calls. The archive index and monthly archive returned HTTP 200; there were no uncaught application errors. The temporary production server was stopped after verification.
+
+Local screenshots and output, ignored by Git:
+
+- `.artifacts/screens/fixed-library-live.png`
+- `.artifacts/screens/fixed-review-live.png`
+- `.artifacts/fixed-ui-live-smoke.json`
+- `.artifacts/screens/test-list-mobile.png`
+- `.artifacts/screens/test-game-mobile.png`
+
+The earlier results below describe the original implementation.
+
 ## Automated checks
 
 `npm run check` passed on Windows with Node.js 26.7 and npm 11.13:
