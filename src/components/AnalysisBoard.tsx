@@ -21,10 +21,10 @@ interface Props {
   onMove: (from: string, to: string) => boolean
 }
 
-const LAST_MOVE: CSSProperties = { background: 'rgba(214, 196, 92, 0.42)' }
-const SELECTED: CSSProperties = { background: 'rgba(244, 189, 36, 0.5)' }
-const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(10, 20, 14, 0.38) 22%, transparent 24%)' }
-const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(10, 20, 14, 0.38) 60%)' }
+const LAST_MOVE: CSSProperties = { background: 'rgba(255, 206, 84, 0.62)' }
+const SELECTED: CSSProperties = { background: 'rgba(224, 80, 31, 0.42)' }
+const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(31, 27, 22, 0.32) 22%, transparent 24%)' }
+const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(31, 27, 22, 0.32) 60%)' }
 
 export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onMove }: Props) {
   const [selection, setSelection] = useState<{ fen: string; square: string } | null>(null)
@@ -63,8 +63,8 @@ export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onM
         darkSquareStyle: { backgroundColor: 'var(--board-dark)' },
         lightSquareNotationStyle: { color: 'var(--board-dark)', fontWeight: 600 },
         darkSquareNotationStyle: { color: 'var(--board-light)', fontWeight: 600 },
-        boardStyle: { borderRadius: 6, overflow: 'hidden' },
-        dropSquareStyle: { boxShadow: 'inset 0 0 0 3px rgba(244, 189, 36, 0.75)' },
+        boardStyle: { borderRadius: 2, overflow: 'hidden' },
+        dropSquareStyle: { boxShadow: 'inset 0 0 0 3px rgba(224, 80, 31, 0.8)' },
         canDragPiece: ({ piece }) => piece.pieceType[0] === turn,
         onPieceDrop: ({ sourceSquare, targetSquare }) => {
           setSelection(null)

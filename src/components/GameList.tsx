@@ -1,5 +1,5 @@
-﻿import { Button, ListBox, SearchField, Select, ToggleButton, ToggleButtonGroup } from '@heroui/react'
-import { ArrowUpRight, Check, Clock3 } from 'lucide-react'
+import { Button, ListBox, SearchField, Select, ToggleButton, ToggleButtonGroup } from '@heroui/react'
+import { ArrowRight, Check } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import type { GameReview, ImportedGame } from '../core'
 import type { Outcome } from '../ui/format'
@@ -17,6 +17,7 @@ interface Props {
 
 type ResultFilter = 'all' | Outcome
 const OUTCOME_LABEL: Record<Outcome, string> = { win: 'Won', loss: 'Lost', draw: 'Drawn' }
+const RESULT_MARK: Record<Outcome, string> = { win: 'W', loss: 'L', draw: '½' }
 
 function dayLabel(timestamp: number) {
   const date = new Date(timestamp * 1000)
@@ -75,7 +76,7 @@ export function GameList({ username, games, selectedId, reviewedIds, reviews, fi
           const wins = entries.filter(game => outcomeFor(game, username) === 'win').length
           const draws = entries.filter(game => outcomeFor(game, username) === 'draw').length
           return <section className="game-day" key={label}>
-            <header className="game-day__heading"><h3>{label}</h3><span className="day-record tabular"><span>{wins}W</span><span>{entries.length - wins - draws}L</span><span>{draws}D</span></span></header>
+            <header className="game-day__heading"><h3>{label}</h3><span className="game-day__rule" aria-hidden="true" /><span className="day-record tabular" aria-label={`${wins} won, ${entries.length - wins - draws} lost, ${draws} drawn`}><span>+{wins}</span><span>−{entries.length - wins - draws}</span><span>={draws}</span></span></header>
             <ListBox aria-label={`${label} games for ${username}`} className="game-list__items" selectionMode="none" onAction={id => { const game = entries.find(item => item.id === id); if (game) onSelect(game) }} items={entries} dependencies={[reviewedIds, username, reviews, selectedId]}>
               {game => <GameRow game={game} username={username} reviewed={reviewedIds.has(game.id)} review={reviews.get(game.id)} current={selectedId === game.id} />}
             </ListBox>
@@ -95,12 +96,13 @@ function GameRow({ game, username, reviewed, review, current }: { game: Imported
   const moveCount = game.pgn.replace(/\{[^}]*\}/g, '').replace(/\[[^\]]*\]/g, '').match(/\b\d+\.(?!\.)/g)?.length ?? 0
   return (
     <ListBox.Item id={game.id} textValue={text} aria-label={`${text}${reviewed ? ', reviewed' : ''}`} aria-current={current ? 'true' : undefined} className={`game-row is-${outcome}`}>
-      <span className="opponent-avatar" aria-hidden="true">{opponent.username[0].toUpperCase()}</span>
+      <span className="result-tile" aria-hidden="true">{RESULT_MARK[outcome]}</span>
       <span className="game-row__main">
         <span className="game-row__title"><span className="game-row__opponent">{opponent.username}</span>{opponent.rating !== null && <span className="game-row__rating tabular">{opponent.rating}</span>}</span>
-        <span className="game-row__meta"><span className={`side-dot is-${side}`} aria-hidden="true" /><Clock3 size={12} aria-hidden="true" /><span className="game-row__time">{timeControlLabel(game)}</span><span className="meta-dot">·</span><span className="game-row__opening">{game.opening ?? 'Unknown opening'}</span>{moveCount > 0 && <span className="game-row__moves">· {moveCount} moves</span>}</span>
+        <span className="game-row__opening">{game.opening ?? 'Unknown opening'}</span>
+        <span className="game-row__meta"><span className={`side-dot is-${side}`} aria-hidden="true" /><span>{capitalise(side)}</span><span className="meta-dot">/</span><span className="game-row__time">{timeControlLabel(game)}</span>{moveCount > 0 && <><span className="meta-dot game-row__moves">/</span><span className="game-row__moves">{moveCount} moves</span></>}</span>
       </span>
-      <span className="game-row__review"><span className={`game-row__action ${reviewed ? 'is-reviewed' : ''}`}>{score !== null && score !== undefined ? <>{score.toFixed(1)} <Check size={14} /></> : reviewed ? <><Check size={14} /> Reviewed</> : <>Analyse <ArrowUpRight size={14} /></>}</span></span>
+      <span className="game-row__review"><span className={`game-row__action ${reviewed ? 'is-reviewed' : ''}`}>{score !== null && score !== undefined ? <><span className="game-row__score">{score.toFixed(1)}</span><Check size={14} /></> : reviewed ? <><Check size={14} /> Reviewed</> : <>Review <ArrowRight size={14} /></>}</span></span>
     </ListBox.Item>
   )
 }

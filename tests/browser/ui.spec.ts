@@ -24,7 +24,7 @@ test.describe('mocked Chess.com import', () => {
   test('imports, reviews with the real engine, replays and explores a line', async ({ page }) => {
     await mockChessCom(page)
     await page.goto('/')
-    await expect(page.getByRole('heading', { name: 'Every game has something to show you.' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Every game has a move worth a second look.' })).toBeVisible()
     await expect(page.getByTestId('board')).toHaveCount(0)
     await importPlayer(page)
 

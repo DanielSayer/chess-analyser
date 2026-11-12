@@ -1,6 +1,6 @@
 import { Alert, Button, ButtonGroup, Link, ProgressBar, Spinner, Tabs, ToggleButton, ToggleButtonGroup } from '@heroui/react'
 import {
-  ArrowLeft, BarChart3, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
+  ArrowLeft, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AnalysisPreset, GameReview, ImportedGame, ParsedGame, Side } from '../core'
@@ -31,7 +31,7 @@ interface Props {
   isActive?: boolean
 }
 
-const BEST_ARROW = 'rgba(45, 187, 162, 0.8)'
+const BEST_ARROW = 'rgba(224, 80, 31, 0.82)'
 const PRESET_HINT: Record<AnalysisPreset, string> = {
   quick: 'Fastest, rough grades',
   standard: 'Balanced speed and accuracy',
@@ -214,7 +214,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
       </div>
 
       <aside ref={panelRef} className="workspace__panel" aria-label="Game review">
-        <header className="report-heading"><span className="report-heading__icon"><BarChart3 size={24} /></span><div><h2>Game review</h2><p>{running ? 'Taking a closer look at your moves.' : review ? 'Find the moments that mattered.' : 'Ready to take a closer look?'}</p></div></header>
+        <header className="report-heading"><div><h2>Game <em>review</em></h2><p>{running ? 'Taking a closer look at your moves.' : review ? 'Find the moments that mattered.' : 'Ready to take a closer look?'}</p></div><span className="report-heading__mark" aria-hidden="true">{review ? '!' : '!?'}</span></header>
         <div className="report-graph">
           {review ? <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} /> : <div className="report-graph__empty"><span /><p>Evaluation appears after your review</p></div>}
         </div>
