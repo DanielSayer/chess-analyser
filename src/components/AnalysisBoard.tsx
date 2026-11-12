@@ -21,8 +21,11 @@ interface Props {
   onMove: (from: string, to: string) => boolean
 }
 
-const LAST_MOVE: CSSProperties = { background: 'rgba(255, 206, 84, 0.62)' }
-const SELECTED: CSSProperties = { background: 'rgba(224, 80, 31, 0.42)' }
+// Opaque tints per square colour, so highlights stay warm on teal.
+const isDark = (square: string) => (square.charCodeAt(0) - 96 + Number(square[1])) % 2 === 0
+const tint = (light: string, dark: string) => (square: string): CSSProperties => ({ background: isDark(square) ? dark : light })
+const LAST_MOVE = tint('#f5d98c', '#d6ad5c')
+const SELECTED = tint('#f6b99c', '#dc8a62')
 const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(31, 27, 22, 0.32) 22%, transparent 24%)' }
 const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(31, 27, 22, 0.32) 60%)' }
 
@@ -39,10 +42,10 @@ export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onM
 
   const squareStyles: Record<string, CSSProperties> = {}
   if (lastMove) {
-    squareStyles[lastMove.from] = LAST_MOVE
-    squareStyles[lastMove.to] = LAST_MOVE
+    squareStyles[lastMove.from] = LAST_MOVE(lastMove.from)
+    squareStyles[lastMove.to] = LAST_MOVE(lastMove.to)
   }
-  if (selected) squareStyles[selected] = SELECTED
+  if (selected) squareStyles[selected] = SELECTED(selected)
   for (const move of targets) squareStyles[move.to] = move.captured ? CAPTURE : TARGET
 
   const ownPiece = (square: string) => chess.get(square as Square)?.color === turn
