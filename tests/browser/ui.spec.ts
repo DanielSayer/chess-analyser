@@ -211,6 +211,19 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByTestId('accuracy-white')).toHaveText(accuracy!)
   })
 
+  test('switches between paper and ink themes and remembers the choice', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'light' })
+    await page.goto('/')
+    const root = page.locator('html')
+    await expect(root).toHaveAttribute('data-theme', 'light')
+    await page.getByRole('button', { name: 'Switch to ink theme' }).click()
+    await expect(root).toHaveAttribute('data-theme', 'dark')
+    await page.reload()
+    await expect(root).toHaveAttribute('data-theme', 'dark')
+    await page.getByRole('button', { name: 'Switch to paper theme' }).click()
+    await expect(root).toHaveAttribute('data-theme', 'light')
+  })
+
   for (const viewport of [{ name: 'wide', width: 1910, height: 1067 }, { name: 'desktop', width: 1440, height: 900 }, { name: 'tablet', width: 1024, height: 900 }, { name: 'mobile', width: 390, height: 844 }]) {
     test(`has no horizontal overflow on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport)
