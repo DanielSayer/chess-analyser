@@ -1,56 +1,105 @@
 ﻿@import "tailwindcss";
 @import "@heroui/styles";
 
-:root, .dark, [data-theme="dark"] {
-  color-scheme: dark;
-  --background: #181818;
-  --foreground: #f1f1f1;
-  --surface: #202020;
-  --surface-foreground: var(--foreground);
-  --surface-secondary: #272727;
-  --surface-secondary-foreground: var(--foreground);
-  --surface-tertiary: #303030;
-  --surface-tertiary-foreground: var(--foreground);
-  --overlay: #242424;
-  --overlay-foreground: var(--foreground);
-  --muted: #a4a4a4;
-  --default: #2a2a2a;
-  --default-foreground: var(--foreground);
-  --field-background: #242424;
-  --field-foreground: var(--foreground);
-  --field-placeholder: #898989;
-  --border: #343434;
-  --separator: #303030;
-  --accent: #f4bd24;
-  --accent-foreground: #1b1605;
-  --success: #16b68b;
-  --success-foreground: #061b14;
-  --warning: #e7b744;
-  --danger: #d57670;
-  --focus: #f4bd24;
-  --radius: 0.6rem;
-  --app-bg: var(--background);
-  --panel: var(--surface);
-  --panel-2: var(--surface-secondary);
-  --line: var(--border);
-  --text-dim: var(--muted);
-  --board-light: #e0e2eb;
-  --board-dark: #414c62;
-  --grade-best: #16b68b;
-  --grade-excellent: #65baac;
-  --grade-good: #a0aaae;
-  --grade-inaccuracy: #e7b744;
-  --grade-mistake: #e5954d;
-  --grade-blunder: #d57670;
-  --grade-forced: #8b8b8b;
-  --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  --font-mono: "Cascadia Mono", ui-monospace, Consolas, monospace;
+/* Paper: the default, like a printed scoresheet. */
+:root, html[data-theme="light"] {
+  color-scheme: light;
+  --paper: #f3eee3;
+  --paper-sunk: #ebe4d5;
+  --sheet: #fbf8f1;
+  --sheet-2: #f1ebdf;
+  --ink: #1f1b16;
+  --ink-2: #4b4439;
+  --ink-3: #7b7264;
+  --rule: #ddd3c1;
+  --rule-strong: #c4b8a3;
+  --pen: #e0501f;
+  --pen-strong: #c2400f;
+  --pen-ink: #fff8f0;
+  --pen-soft: #f8dccd;
+  --pen-wash: #fbe9de;
+  --win: #2f7f58;
+  --loss: #b23a48;
+  --draw: #8a8172;
+  --eval-black: #2a251f;
+  --eval-white: #fbf8f1;
+  --shadow: 0 1px 0 #fff8, 0 10px 30px -18px #3a2c1a55;
 }
+
+/* Ink: the same sheet with the lights down. */
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #151310;
+  --paper-sunk: #100e0c;
+  --sheet: #1d1a16;
+  --sheet-2: #25211c;
+  --ink: #eee5d3;
+  --ink-2: #c7bca8;
+  --ink-3: #91877a;
+  --rule: #302b24;
+  --rule-strong: #4a4237;
+  --pen: #ff6b3d;
+  --pen-strong: #ff8a62;
+  --pen-ink: #1c0c04;
+  --pen-soft: #4a2416;
+  --pen-wash: #2c1a12;
+  --win: #66c493;
+  --loss: #ec7c86;
+  --draw: #a59c8c;
+  --eval-black: #0c0b09;
+  --eval-white: #e9e0cd;
+  --shadow: 0 14px 40px -24px #000;
+}
+
+:root, html[data-theme="light"], html[data-theme="dark"] {
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --surface: var(--sheet);
+  --surface-foreground: var(--ink);
+  --surface-secondary: var(--sheet-2);
+  --surface-secondary-foreground: var(--ink);
+  --surface-tertiary: var(--paper-sunk);
+  --surface-tertiary-foreground: var(--ink);
+  --overlay: var(--sheet);
+  --overlay-foreground: var(--ink);
+  --muted: var(--ink-3);
+  --default: var(--sheet-2);
+  --default-foreground: var(--ink);
+  --field-background: var(--sheet);
+  --field-foreground: var(--ink);
+  --field-placeholder: var(--ink-3);
+  --field-border: var(--rule-strong);
+  --field-border-width: 1px;
+  --segment: var(--sheet);
+  --segment-foreground: var(--ink);
+  --border: var(--rule);
+  --separator: var(--rule);
+  --accent: var(--pen);
+  --accent-foreground: var(--pen-ink);
+  --success: var(--win);
+  --danger: var(--loss);
+  --focus: var(--pen);
+  --link: var(--ink);
+  --radius: 0.5rem;
+  --board-light: #ece3cf;
+  --board-dark: #5f8a83;
+  --grade-best: #2e9f74;
+  --grade-excellent: #5fae9c;
+  --grade-good: #9c9483;
+  --grade-inaccuracy: #e3a92c;
+  --grade-mistake: #e7782f;
+  --grade-blunder: #d4434b;
+  --grade-forced: #8b8478;
+  --font-sans: "Instrument Sans Variable", "Segoe UI", system-ui, sans-serif;
+  --font-serif: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-mono: "JetBrains Mono Variable", "Cascadia Mono", ui-monospace, Consolas, monospace;
+}
+
 html, body, #root { min-height: 100%; }
-body { margin: 0; background: var(--app-bg); color: var(--foreground); font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif; font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; transition: background-color .25s, color .25s; }
 button, input, select, textarea { font: inherit; }
 button { cursor: pointer; }
 [hidden] { display: none !important; }
 .tabular { font-variant-numeric: tabular-nums; }
 :focus-visible { outline-color: var(--focus); }
-::selection { background: #f4bd2444; }
+::selection { background: var(--pen-soft); }

@@ -1,13 +1,24 @@
 <!doctype html>
-<html lang="en" class="dark" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#181818" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f3eee3" />
     <meta name="description" content="Review your public Chess.com games with Stockfish running in your browser." />
     <title>Chess Analyser</title>
+    <script>
+      // Apply the saved theme before first paint.
+      (function () {
+        var theme = null
+        try { theme = localStorage.getItem('chess-analyser:theme') } catch (e) {}
+        if (theme !== 'paper' && theme !== 'ink') theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'ink' : 'paper'
+        var dark = theme === 'ink'
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+        document.documentElement.classList.add(dark ? 'dark' : 'light')
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

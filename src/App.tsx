@@ -5,9 +5,11 @@ import { GameWorkspace } from './components/GameWorkspace'
 import { Navigation } from './components/Navigation'
 import type { GameReview, ImportedGame } from './core'
 import { useLibrary } from './hooks/useLibrary'
+import { useTheme } from './hooks/useTheme'
 
 export default function App() {
   const library = useLibrary()
+  const { theme, setTheme } = useTheme()
   const { state } = library
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [view, setView] = useState<'games' | 'board'>('games')
@@ -32,7 +34,7 @@ export default function App() {
   const cached = selected ? reviews.get(selected.id) : null
   return (
     <div className="app" data-view={activeView}>
-      <Navigation view={activeView} canReview={selected !== null} hasLocalData={state.username !== null || state.reviewedIds.size > 0} onNavigate={navigate} onClear={clearAll} />
+      <Navigation view={activeView} canReview={selected !== null} hasLocalData={state.username !== null || state.reviewedIds.size > 0} theme={theme} onTheme={setTheme} onNavigate={navigate} onClear={clearAll} />
       <main className="main">
         <section className="library-view" hidden={activeView !== 'games'} aria-label="Your game library">
           <GameLibrary library={library} selectedId={selectedId} reviews={reviews} onSelect={selectGame} />
