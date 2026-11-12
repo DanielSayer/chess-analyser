@@ -211,16 +211,16 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByTestId('accuracy-white')).toHaveText(accuracy!)
   })
 
-  test('switches between paper and ink themes and remembers the choice', async ({ page }) => {
+  test('switches between light and dark themes and remembers the choice', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light' })
     await page.goto('/')
     const root = page.locator('html')
     await expect(root).toHaveAttribute('data-theme', 'light')
-    await page.getByRole('button', { name: 'Switch to ink theme' }).click()
+    await page.getByRole('button', { name: 'Switch to dark theme' }).click()
     await expect(root).toHaveAttribute('data-theme', 'dark')
     await page.reload()
     await expect(root).toHaveAttribute('data-theme', 'dark')
-    await page.getByRole('button', { name: 'Switch to paper theme' }).click()
+    await page.getByRole('button', { name: 'Switch to light theme' }).click()
     await expect(root).toHaveAttribute('data-theme', 'light')
   })
 

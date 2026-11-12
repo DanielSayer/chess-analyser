@@ -10,7 +10,7 @@ function initialTheme(): Theme {
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'ink' : 'paper'
 }
 
-/** Paper (light) or ink (dark). Stored only in this browser. */
+/** Light ('paper') or dark ('ink'). Stored only in this browser. */
 export function useTheme() {
   const [theme, setThemeState] = useState<Theme>(initialTheme)
 
@@ -20,7 +20,7 @@ export function useTheme() {
     root.dataset.theme = dark ? 'dark' : 'light'
     root.classList.toggle('dark', dark)
     root.classList.toggle('light', !dark)
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#151310' : '#f3eee3')
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#131416' : '#f4f5f7')
   }, [theme])
 
   const setTheme = useCallback((next: Theme) => {

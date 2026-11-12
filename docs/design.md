@@ -6,20 +6,20 @@ Layout updated 11 November 2026 from the user's Chessigma screenshots; visual id
 
 - The navigation rail is a numbered contents list (01 Your games, 02 Game review) with the theme switch and About at the foot. It is 228px wide on large screens, 204px at smaller desktop widths, and collapses to icons below 1150px.
 - The library is a centred column, up to 760px wide, under a ruled masthead. It contains the player line with a W/L/½ form guide, three pill actions and a ledger of games grouped by day. Import and filters expand in place. There is no decorative empty chessboard.
-- Games show a W/L/½ result tile, opponent, rating, opening in serif italic, colour, time control and move count. The Review action opens the review. Day headings are italic with a rule and a +/−/= record.
+- Games show a W/L/½ result tile, opponent, rating, opening, colour, time control and move count. The Review action opens the review. Day headings sit on a rule and a +/−/= record.
 - The review uses a large board on the left and a report on the right. The report contains its evaluation graph, Summary and Moves tabs, player comparison, critical moments and review controls. No game-list sidebar competes with the board.
 - Board size follows the available width and viewport height. The report is 370px wide, narrowing to 330px and 310px on smaller desktops. Below 980px it sits underneath the board.
 - Below 700px navigation becomes a compact top bar. Library rows, import controls and the board fit a narrow screen without horizontal scrolling.
 
 ## Visual language
 
-The concept is an annotated scoresheet: printed paper, ink and a red pen.
+The concept is an annotated scoresheet with a red pen, on neutral grey and white surfaces. The user rejected cream surfaces and the earlier serif (12 November 2026).
 
-- Two themes share one identity. Paper (light, default) and Ink (dark) follow the system setting until the user picks one; the choice is stored in this browser only.
-- Type: Fraunces for headlines, names and big numbers; Instrument Sans for interface text; JetBrains Mono for notation, clocks, ratings and captions. All three are bundled, so no font requests leave the app.
-- Accent is a vermilion "red pen", used for primary actions, current navigation, selections, the best-move arrow and the evaluation cursor. Results use green, claret and stone and always carry a letter.
+- Light and dark themes share one identity. They follow the system setting until the user picks one; the choice is stored in this browser only.
+- Type: Figtree for all text, including headings and captions; JetBrains Mono only for notation, clocks, ratings and scores. Inter and Geist are excluded by request. Both fonts are bundled, so no font requests leave the app.
+- Accent is a vermilion "red pen", used for primary actions, current navigation, selections, the best-move arrow and the evaluation cursor. Results use green, claret and grey and always carry a letter.
 - The brand mark is the "!?" annotation glyph. It also appears on the welcome screen and the report heading.
-- The board is cream and teal inside a book-diagram frame (heavy rule, gap, board). Last-move and selection tints are opaque per square colour so they stay warm on teal. Pieces are react-chessboard's standard set.
+- The board is pale grey and teal inside a book-diagram frame (heavy rule, gap, board). Last-move and selection tints are opaque per square colour so they stay warm on teal. Pieces are react-chessboard's standard set.
 - Player clocks look like a chess clock: the side to move is lit. The report uses underlined tabs, a ruled scoresheet move grid and a margin-note style for the selected move or explored line.
 - HeroUI supplies accessible form controls, buttons, tabs, dialogs, progress and listbox interactions. Application CSS controls the overall layout and hierarchy.
 - The reference's coaching, pricing, account and unrelated training sections are outside this app's scope.

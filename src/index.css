@@ -1,53 +1,53 @@
 ﻿@import "tailwindcss";
 @import "@heroui/styles";
 
-/* Paper: the default, like a printed scoresheet. */
+/* Light (default). */
 :root, html[data-theme="light"] {
   color-scheme: light;
-  --paper: #f3eee3;
-  --paper-sunk: #ebe4d5;
-  --sheet: #fbf8f1;
-  --sheet-2: #f1ebdf;
-  --ink: #1f1b16;
-  --ink-2: #4b4439;
-  --ink-3: #7b7264;
-  --rule: #ddd3c1;
-  --rule-strong: #c4b8a3;
+  --paper: #f4f5f7;
+  --paper-sunk: #eceef1;
+  --sheet: #ffffff;
+  --sheet-2: #f0f2f4;
+  --ink: #16181c;
+  --ink-2: #464b53;
+  --ink-3: #747b85;
+  --rule: #e0e3e8;
+  --rule-strong: #c5cbd3;
   --pen: #e0501f;
   --pen-strong: #c2400f;
   --pen-ink: #fff8f0;
-  --pen-soft: #f8dccd;
-  --pen-wash: #fbe9de;
+  --pen-soft: #fbdccd;
+  --pen-wash: #fdf0ea;
   --win: #2f7f58;
   --loss: #b23a48;
-  --draw: #8a8172;
-  --eval-black: #2a251f;
-  --eval-white: #fbf8f1;
-  --shadow: 0 1px 0 #fff8, 0 10px 30px -18px #3a2c1a55;
+  --draw: #848b95;
+  --eval-black: #22252a;
+  --eval-white: #ffffff;
+  --shadow: 0 1px 2px #0000000d, 0 10px 30px -18px #1a1f2a33;
 }
 
-/* Ink: the same sheet with the lights down. */
+/* Dark. */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #151310;
-  --paper-sunk: #100e0c;
-  --sheet: #1d1a16;
-  --sheet-2: #25211c;
-  --ink: #eee5d3;
-  --ink-2: #c7bca8;
-  --ink-3: #91877a;
-  --rule: #302b24;
-  --rule-strong: #4a4237;
+  --paper: #131416;
+  --paper-sunk: #0e0f11;
+  --sheet: #1b1d20;
+  --sheet-2: #24272b;
+  --ink: #eceef1;
+  --ink-2: #bdc2c9;
+  --ink-3: #8a919b;
+  --rule: #2c3035;
+  --rule-strong: #444a52;
   --pen: #ff6b3d;
   --pen-strong: #ff8a62;
   --pen-ink: #1c0c04;
-  --pen-soft: #4a2416;
-  --pen-wash: #2c1a12;
+  --pen-soft: #4a2618;
+  --pen-wash: #2a1a14;
   --win: #66c493;
   --loss: #ec7c86;
-  --draw: #a59c8c;
-  --eval-black: #0c0b09;
-  --eval-white: #e9e0cd;
+  --draw: #9aa1ab;
+  --eval-black: #0c0d0f;
+  --eval-white: #e8ebee;
   --shadow: 0 14px 40px -24px #000;
 }
 
@@ -81,17 +81,16 @@ html[data-theme="dark"] {
   --focus: var(--pen);
   --link: var(--ink);
   --radius: 0.5rem;
-  --board-light: #ece3cf;
+  --board-light: #e7ecec;
   --board-dark: #5f8a83;
   --grade-best: #2e9f74;
   --grade-excellent: #5fae9c;
-  --grade-good: #9c9483;
+  --grade-good: #969ca5;
   --grade-inaccuracy: #e3a92c;
   --grade-mistake: #e7782f;
   --grade-blunder: #d4434b;
-  --grade-forced: #8b8478;
-  --font-sans: "Instrument Sans Variable", "Segoe UI", system-ui, sans-serif;
-  --font-serif: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --grade-forced: #878d96;
+  --font-sans: "Figtree Variable", "Segoe UI", system-ui, sans-serif;
   --font-mono: "JetBrains Mono Variable", "Cascadia Mono", ui-monospace, Consolas, monospace;
 }
 
