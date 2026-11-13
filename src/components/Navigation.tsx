@@ -31,7 +31,6 @@ export function Navigation({ view, canReview, hasLocalData, theme, onTheme, onNa
         </Button>
       </nav>
       <div className="navigation__bottom">
-        <p className="device-note"><span className="status-dot" aria-hidden="true" />Stockfish runs in this browser. Nothing is uploaded.</p>
         <div className="navigation__tools">
           <Button size="sm" variant="ghost" className="theme-toggle" aria-label={`Switch to ${next === 'ink' ? 'dark' : 'light'} theme`} onPress={() => onTheme(next)}>
             {theme === 'paper' ? <Moon size={16} /> : <Sun size={16} />}<span>{next === 'ink' ? 'Dark' : 'Light'}</span>

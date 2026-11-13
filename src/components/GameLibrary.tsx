@@ -34,7 +34,6 @@ export function GameLibrary({ library, selectedId, reviews, onSelect }: Props) {
     <div className={`library-page ${state.username ? '' : 'library-page--welcome'}`}>
       <header className="library-title">
         <div><p className="eyebrow">Chess.com games, annotated locally</p><h1>Your <em>games</em></h1></div>
-        <span className="library-title__note"><span className="status-dot" /> Engine ready on this device</span>
       </header>
       {!state.username && state.status !== 'restoring' && <div className="welcome">
         <span className="welcome__mark" aria-hidden="true">!?</span><h2>Every game has a move <em>worth a second look.</em></h2>

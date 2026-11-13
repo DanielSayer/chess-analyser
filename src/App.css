@@ -30,12 +30,9 @@
 .nav-link[data-disabled="true"] { opacity: .4; }
 
 .navigation__bottom { margin-top: auto; display: grid; gap: 16px; }
-.device-note { display: flex; gap: 9px; align-items: baseline; font-size: 11.5px; line-height: 1.45; color: var(--ink-3); padding: 0 4px; }
-.device-note .status-dot { transform: translateY(-1px); }
 .navigation__tools { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-top: 14px; border-top: 1px dashed var(--rule-strong); }
 .theme-toggle, .about-trigger { color: var(--ink-2); gap: 7px; font-weight: 500; padding-inline: 8px; }
 .theme-toggle:hover, .about-trigger:hover { color: var(--ink); background: var(--sheet-2); }
-.status-dot { display: inline-block; width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--win); box-shadow: 0 0 0 3px color-mix(in oklab, var(--win) 20%, transparent); }
 
 /* Buttons: pills with a pen-stroke edge rather than chunky blocks. */
 .button { font-weight: 600; border-radius: 999px; }
@@ -54,7 +51,6 @@
 .library-title { display: flex; justify-content: space-between; align-items: end; gap: 16px; padding-bottom: 18px; border-bottom: 2px solid var(--ink); }
 .library-title h1 { font-size: 44px; line-height: 1.05; font-weight: 750; letter-spacing: -1.4px; }
 .library-title h1 em { font-style: normal; color: var(--pen); }
-.library-title__note { display: flex; align-items: center; gap: 8px; color: var(--ink-3); font-size: 10.5px; padding-bottom: 6px; white-space: nowrap; }
 
 .welcome { padding: 40px 12px 8px; text-align: center; }
 .welcome__mark { display: inline-block; font-size: 84px; line-height: .9; font-weight: 700; color: var(--pen); letter-spacing: -4px; transform: rotate(-6deg); margin-bottom: 14px; }
@@ -327,7 +323,7 @@
 @media (max-width: 1150px) {
   .app { grid-template-columns: 76px minmax(0,1fr); }
   .navigation { align-items: center; padding: 22px 10px; gap: 28px; }
-  .brand__text, .nav-link > span, .nav-link__no, .device-note, .theme-toggle > span { display: none; }
+  .brand__text, .nav-link > span, .nav-link__no, .theme-toggle > span { display: none; }
   .nav-link > svg { display: block; }
   .nav-link { justify-content: center; width: 46px; padding-inline: 0; }
   .nav-link[aria-current="page"]::before { left: -10px; }
@@ -372,7 +368,6 @@
   .library-page { width: auto; margin: 26px 16px 56px; gap: 18px; }
   .library-title { padding-bottom: 14px; }
   .library-title h1 { font-size: 40px; letter-spacing: -1.2px; }
-  .library-title__note { display: none; }
   .eyebrow { font-size: 9.5px; letter-spacing: 1px; }
   .player-card { flex-wrap: wrap; gap: 12px; }
   .player-avatar { width: 44px; height: 44px; font-size: 20px; }
