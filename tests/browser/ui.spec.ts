@@ -57,6 +57,8 @@ test.describe('mocked Chess.com import', () => {
     await page.getByRole('heading', { name: /Italian Game/ }).click()
     await page.keyboard.press('End')
     await expect(position).toHaveText('4. Qxf7#')
+    const boardGrade = page.getByTestId('board').locator('.grade-badge')
+    await expect(boardGrade).toHaveCount(0)
 
     await page.getByRole('radio', { name: 'Quick' }).click()
     await page.getByRole('button', { name: 'Review game' }).click()
@@ -71,12 +73,42 @@ test.describe('mocked Chess.com import', () => {
     await page.getByRole('button', { name: /3… Nf6/ }).click()
     await expect(position).toHaveText('3… Nf6')
     await expect(page.getByLabel('Selected move')).toContainText('Blunder')
+    await expect(page.locator('[data-square="f6"]').getByRole('img', { name: 'Blunder', exact: true })).toBeVisible()
+    await expect(boardGrade).toHaveCount(1)
+    await expect(page.locator('[data-square="f6"] [data-piece="bN"]')).toBeVisible()
+    await page.screenshot({ path: `${SHOTS}/test-piece-grade-desktop.png` })
+    await page.setViewportSize({ width: 390, height: 844 })
+    await expect(boardGrade).toBeVisible()
+    await page.screenshot({ path: `${SHOTS}/test-piece-grade-mobile.png`, fullPage: true })
+    await page.setViewportSize({ width: 1280, height: 720 })
+
+    // The badge belongs to the played destination, including after flipping and stepping back.
+    await page.getByRole('button', { name: 'Flip board' }).click()
+    await expect(page.locator('[data-square="f6"]').getByRole('img', { name: 'Blunder', exact: true })).toBeVisible()
+    await page.getByRole('button', { name: 'Previous move' }).click()
+    await expect(page.locator('[data-square="h5"] .grade-badge')).toBeVisible()
+    await expect(page.locator('[data-square="h5"] [data-piece="wQ"]')).toBeVisible()
+    await expect(page.locator('[data-square="f6"]').getByRole('img')).toHaveCount(0)
+    await page.getByRole('button', { name: 'Next move' }).click()
+    await expect(page.locator('[data-square="f6"]').getByRole('img', { name: 'Blunder', exact: true })).toBeVisible()
+    await expect(page.locator('[data-square="f6"] [data-piece="bN"]')).toBeVisible()
+    await page.getByRole('button', { name: 'Flip board' }).click()
+
+    // Exploring an ungraded move hides the game's badge; returning restores it.
+    await page.locator('[data-square="d2"]').click()
+    await page.locator('[data-square="d4"]').click()
+    await expect(page.getByText('Exploring')).toBeVisible()
+    await expect(boardGrade).toHaveCount(0)
+    await expect(page.locator('[data-square="d4"] [data-piece="wP"]')).toBeVisible()
+    await page.getByRole('button', { name: 'Back to game' }).click()
+    await expect(page.locator('[data-square="f6"]').getByRole('img', { name: 'Blunder', exact: true })).toBeVisible()
 
     // Clicking the evaluation graph jumps to a position.
     const graph = page.getByRole('slider', { name: 'Evaluation graph' })
     const box = (await graph.boundingBox())!
     await graph.click({ position: { x: 2, y: box.height / 2 } })
     await expect(position).toHaveText('Start')
+    await expect(boardGrade).toHaveCount(0)
 
     // Explore a legal alternative and return to the game.
     await page.locator('[data-square="d2"]').click()

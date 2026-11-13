@@ -3,8 +3,9 @@ import type { Square } from 'chess.js'
 import { useMemo, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Chessboard } from 'react-chessboard'
-import type { Side } from '../core'
+import type { MoveGrade, Side } from '../core'
 import type { SquareMove } from '../hooks/useReplay'
+import { GradeBadge } from './GradeBadge'
 
 export interface BoardArrow {
   from: string
@@ -16,6 +17,7 @@ interface Props {
   fen: string
   orientation: Side
   lastMove: SquareMove | null
+  moveGrade: MoveGrade | null
   arrows: BoardArrow[]
   animate: boolean
   onMove: (from: string, to: string) => boolean
@@ -29,7 +31,7 @@ const SELECTED = tint('#f6b99c', '#dc8a62')
 const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(31, 27, 22, 0.32) 22%, transparent 24%)' }
 const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(31, 27, 22, 0.32) 60%)' }
 
-export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onMove }: Props) {
+export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, animate, onMove }: Props) {
   const [selection, setSelection] = useState<{ fen: string; square: string } | null>(null)
   const chess = useMemo(() => new Chess(fen), [fen])
   const selected = selection?.fen === fen ? selection.square : null
@@ -62,6 +64,12 @@ export function AnalysisBoard({ fen, orientation, lastMove, arrows, animate, onM
         arrows: arrows.map(arrow => ({ startSquare: arrow.from, endSquare: arrow.to, color: arrow.color })),
         clearArrowsOnPositionChange: true,
         squareStyles,
+        squareRenderer: ({ square, children }) => (
+          <div className="board-square" style={squareStyles[square]}>
+            {children}
+            {moveGrade && square === lastMove?.to && <GradeBadge grade={moveGrade} size="board" />}
+          </div>
+        ),
         lightSquareStyle: { backgroundColor: 'var(--board-light)' },
         darkSquareStyle: { backgroundColor: 'var(--board-dark)' },
         lightSquareNotationStyle: { color: 'var(--board-dark)', fontWeight: 600 },

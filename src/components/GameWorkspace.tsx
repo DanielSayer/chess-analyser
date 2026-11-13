@@ -176,6 +176,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
                 fen={replay.fen}
                 orientation={orientation}
                 lastMove={replay.lastMove}
+                moveGrade={!variation && index > 0 ? review?.moves[index - 1]?.grade ?? null : null}
                 arrows={arrows}
                 animate={!replay.jumped}
                 onMove={replay.playMove}

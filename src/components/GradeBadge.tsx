@@ -1,7 +1,7 @@
 import type { MoveGrade } from '../core'
 import { GRADES } from '../ui/format'
 
-export function GradeBadge({ grade, size = 'md' }: { grade: MoveGrade; size?: 'sm' | 'md' }) {
+export function GradeBadge({ grade, size = 'md' }: { grade: MoveGrade; size?: 'sm' | 'md' | 'board' }) {
   const meta = GRADES[grade]
   return (
     <span
