@@ -127,6 +127,7 @@ test.describe('mocked Chess.com import', () => {
     await page.getByRole('button', { name: 'Back to game' }).click()
     await expect(position).toHaveText('Start')
 
+    await graph.scrollIntoViewIfNeeded()
     await page.screenshot({ path: `${SHOTS}/test-review-desktop.png` })
   })
 

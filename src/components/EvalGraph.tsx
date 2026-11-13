@@ -56,7 +56,7 @@ export function EvalGraph({ review, index, onSelect }: Props) {
         <polygon points={area} className="eval-graph__white" />
         <line x1="0" x2="100" y1="50" y2="50" className="eval-graph__mid" vectorEffect="non-scaling-stroke" />
       </svg>
-      {review.moves.map(m => m.grade === 'blunder' && (
+      {review.moves.map(m => (m.grade === 'blunder' || m.grade === 'best') && (
         <span
           key={m.ply}
           className="eval-graph__dot"

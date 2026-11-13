@@ -172,7 +172,7 @@ function LiveGraph({ ref, positions, total, review }: {
         <line x1="0" x2="100" y1="50" y2="50" className="eval-graph__mid" vectorEffect="non-scaling-stroke" />
         {values.length > 1 && <polyline points={points} className="review-flight__trace" vectorEffect="non-scaling-stroke" />}
       </svg>
-      {review?.moves.map(m => m.grade === 'blunder' && (
+      {review?.moves.map(m => (m.grade === 'blunder' || m.grade === 'best') && (
         <span
           key={m.ply}
           className="eval-graph__dot review-flight__dot"
