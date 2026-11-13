@@ -9,8 +9,6 @@ interface Props {
   onSelect: (index: number) => void
 }
 
-const MARKED = new Set(['inaccuracy', 'mistake', 'blunder'])
-
 /** White's winning chances over the game. Click or use arrow keys to move through it. */
 export function EvalGraph({ review, index, onSelect }: Props) {
   const ref = useRef<HTMLDivElement>(null)
@@ -58,7 +56,7 @@ export function EvalGraph({ review, index, onSelect }: Props) {
         <polygon points={area} className="eval-graph__white" />
         <line x1="0" x2="100" y1="50" y2="50" className="eval-graph__mid" vectorEffect="non-scaling-stroke" />
       </svg>
-      {review.moves.map(m => MARKED.has(m.grade) && (
+      {review.moves.map(m => m.grade === 'blunder' && (
         <span
           key={m.ply}
           className="eval-graph__dot"

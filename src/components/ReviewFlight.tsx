@@ -24,7 +24,6 @@ interface Props {
   onLanded: () => void
 }
 
-const MARKED = new Set(['inaccuracy', 'mistake', 'blunder'])
 const EASE = 'cubic-bezier(.22,.8,.24,1)'
 /** A fast review still stays centre stage long enough to be seen. */
 const MIN_STAGE_MS = 1200
@@ -173,7 +172,7 @@ function LiveGraph({ ref, positions, total, review }: {
         <line x1="0" x2="100" y1="50" y2="50" className="eval-graph__mid" vectorEffect="non-scaling-stroke" />
         {values.length > 1 && <polyline points={points} className="review-flight__trace" vectorEffect="non-scaling-stroke" />}
       </svg>
-      {review?.moves.map(m => MARKED.has(m.grade) && (
+      {review?.moves.map(m => m.grade === 'blunder' && (
         <span
           key={m.ply}
           className="eval-graph__dot review-flight__dot"
