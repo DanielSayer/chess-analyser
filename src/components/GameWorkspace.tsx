@@ -1,4 +1,4 @@
-import { Alert, Button, ButtonGroup, Link, ProgressBar, Spinner, Tabs, ToggleButton, ToggleButtonGroup } from '@heroui/react'
+import { Alert, Button, ButtonGroup, Link, Spinner, Tabs, ToggleButton, ToggleButtonGroup } from '@heroui/react'
 import {
   ArrowLeft, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
 } from 'lucide-react'
@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AnalysisPreset, GameReview, ImportedGame, ParsedGame, Side } from '../core'
 import { PRESETS, lineToSan, parseGame, sideForUsername } from '../core'
 import { useGameReview } from '../hooks/useGameReview'
+import type { ReviewRun } from '../hooks/useGameReview'
 import { usePositionLines } from '../hooks/usePositionLines'
 import { useReplay } from '../hooks/useReplay'
 import { useReplayKeys } from '../hooks/useReplayKeys'
@@ -15,6 +16,8 @@ import { EvalBar } from './EvalBar'
 import { EvalGraph } from './EvalGraph'
 import { GradeBadge } from './GradeBadge'
 import { MoveList } from './MoveList'
+import { ReviewFlight } from './ReviewFlight'
+import type { Landing } from './ReviewFlight'
 import { ReviewSummary } from './ReviewSummary'
 import {
   GRADES, capitalise, endingText, formatEval, fullDate, moveNumber, numberedLine, scoreline, timeControlLabel,
@@ -120,9 +123,18 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
   const [preset, setPreset] = useState<AnalysisPreset>(cachedReview?.preset ?? 'standard')
   const [tab, setTab] = useState<'summary' | 'moves'>('summary')
   const panelRef = useRef<HTMLElement>(null)
+  const graphSlotRef = useRef<HTMLDivElement>(null)
 
   const review = analysis.review
   const running = analysis.run !== null
+
+  // The live graph outlives its run long enough to fly back into the panel.
+  const [flight, setFlight] = useState<{ run: ReviewRun; landing: Landing | null } | null>(null)
+  if (analysis.run && flight?.run !== analysis.run) {
+    setFlight({ run: analysis.run, landing: null })
+  } else if (!analysis.run && flight && !flight.landing) {
+    setFlight({ ...flight, landing: analysis.cancelled || analysis.error ? 'abort' : 'complete' })
+  }
   useEffect(() => {
     if (review) panelRef.current?.scrollTo({ top: 0 })
   }, [review])
@@ -216,8 +228,8 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
 
       <aside ref={panelRef} className="workspace__panel" aria-label="Game review">
         <header className="report-heading"><div><h2>Game <em>review</em></h2><p>{running ? 'Taking a closer look at your moves.' : review ? 'Find the moments that mattered.' : 'Ready to take a closer look?'}</p></div><span className="report-heading__mark" aria-hidden="true">{review ? '!' : '!?'}</span></header>
-        <div className="report-graph">
-          {review ? <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} /> : <div className="report-graph__empty"><span /><p>Evaluation appears after your review</p></div>}
+        <div ref={graphSlotRef} className="report-graph">
+          {flight ? <div className="report-graph__ghost" aria-hidden="true" /> : review ? <EvalGraph review={review} index={variation ? variation.baseIndex : index} onSelect={replay.goTo} /> : <div className="report-graph__empty"><span /><p>Evaluation appears after your review</p></div>}
         </div>
         {(review || variation || index > 0) && <div className="report-insight">
         <MoveInsight
@@ -231,49 +243,28 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
 
         </div>}
         <section className="analysis-card">
-          {analysis.run ? (
-            <div className="analysis-card__progress">
-              <ProgressBar
-                aria-label="Review progress"
-                value={analysis.run.progress?.percent ?? 0}
-                isIndeterminate={analysis.run.progress === null}
-                size="sm"
-              >
-                <div className="analysis-card__progress-label">
-                  <span>{PRESETS[analysis.run.preset].label} review</span>
-                  <ProgressBar.Output className="tabular">
-                    {analysis.run.progress ? `${analysis.run.progress.completed} / ${analysis.run.progress.total} positions` : 'Starting engine'}
-                  </ProgressBar.Output>
-                </div>
-                <ProgressBar.Track><ProgressBar.Fill /></ProgressBar.Track>
-              </ProgressBar>
-              <Button size="sm" variant="secondary" onPress={analysis.cancel}>Cancel</Button>
-            </div>
-          ) : (
-            <>
-              <div className="analysis-card__controls">
-                <ToggleButtonGroup
-                  aria-label="Review depth"
-                  selectionMode="single"
-                  disallowEmptySelection
-                  selectedKeys={[preset]}
-                  onSelectionChange={keys => setPreset(([...keys][0] as AnalysisPreset) ?? 'standard')}
-                  size="sm"
-                  fullWidth
-                >
-                  {(Object.keys(PRESETS) as AnalysisPreset[]).map(key => (
-                    <ToggleButton key={key} id={key}>{PRESETS[key].label}</ToggleButton>
-                  ))}
-                </ToggleButtonGroup>
-                <Button variant={review ? 'secondary' : 'primary'} onPress={() => analysis.start(preset)} isDisabled={analysis.loadingSaved}>
-                  {review ? 'Re-run' : 'Review game'}
-                </Button>
-              </div>
-              <p className="analysis-card__hint">
-                {PRESET_HINT[preset]}. Depth {PRESETS[preset].depth}, runs on this device.
-              </p>
-            </>
-          )}
+          <div className="analysis-card__controls">
+            <ToggleButtonGroup
+              aria-label="Review depth"
+              selectionMode="single"
+              disallowEmptySelection
+              selectedKeys={[preset]}
+              onSelectionChange={keys => setPreset(([...keys][0] as AnalysisPreset) ?? 'standard')}
+              size="sm"
+              fullWidth
+              isDisabled={running}
+            >
+              {(Object.keys(PRESETS) as AnalysisPreset[]).map(key => (
+                <ToggleButton key={key} id={key}>{PRESETS[key].label}</ToggleButton>
+              ))}
+            </ToggleButtonGroup>
+            <Button variant={review ? 'secondary' : 'primary'} onPress={() => analysis.start(preset)} isDisabled={analysis.loadingSaved || running}>
+              {running ? 'Reviewing…' : review ? 'Re-run' : 'Review game'}
+            </Button>
+          </div>
+          <p className="analysis-card__hint">
+            {PRESET_HINT[preset]}. Depth {PRESETS[preset].depth}, runs on this device.
+          </p>
           {analysis.cancelled && (
             <p className="analysis-card__note" role="status">
               Review cancelled.{review ? ' Showing the previous review.' : ''}
@@ -320,6 +311,19 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
           </Tabs.Panel>
         </Tabs>
       </aside>
+      {flight && (
+        <ReviewFlight
+          key={flight.run.id}
+          run={analysis.run ?? flight.run}
+          total={parsed.plies.length + 1}
+          landing={flight.landing}
+          review={review}
+          label={i => (i === 0 ? 'Start' : `${moveNumber(i)} ${parsed.plies[i - 1].san}`)}
+          slotRef={graphSlotRef}
+          onCancel={analysis.cancel}
+          onLanded={() => setFlight(f => (f?.run.id === flight.run.id ? null : f))}
+        />
+      )}
     </div>
   )
 }

@@ -202,6 +202,37 @@
 .eval-graph__cursor { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--pen); pointer-events: none; }
 .report-graph__empty { height: 86px; position: relative; border: 1.5px dashed var(--rule-strong); border-radius: 6px; background: repeating-linear-gradient(-45deg, transparent 0 7px, color-mix(in oklab, var(--rule) 55%, transparent) 7px 8px); display: grid; place-items: center; }
 .report-graph__empty p { color: var(--ink-2); font-size: 10.5px; padding: 3px 10px; background: var(--sheet); border-radius: 999px; border: 1px solid var(--rule); }
+.report-graph__ghost { height: 86px; border: 1.5px dashed var(--rule-strong); border-radius: 6px; background: var(--paper-sunk); }
+
+/* Live review: the graph flies centre stage while it draws, then returns. */
+.review-flight { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 24px; pointer-events: none; }
+.review-flight__scrim { position: absolute; inset: 0; background: color-mix(in oklab, var(--paper-sunk) 55%, transparent); backdrop-filter: blur(3px); }
+.review-flight__stage { position: relative; width: min(780px, 100%); display: grid; gap: 16px; padding: 22px 24px 20px; }
+.review-flight__sheet { position: absolute; inset: 0; background: var(--sheet); border: 1px solid var(--rule); border-radius: 18px; box-shadow: 0 30px 80px -30px #0b0e1466, var(--shadow); }
+.review-flight__head, .review-flight__graph, .review-flight__footer { position: relative; pointer-events: auto; }
+.review-flight__head { display: flex; align-items: end; justify-content: space-between; gap: 12px; padding-bottom: 12px; border-bottom: 2px solid var(--ink); }
+.review-flight__eyebrow { font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--pen-strong); font-weight: 700; margin-bottom: 3px; }
+.review-flight__title { font-size: 22px; font-weight: 750; letter-spacing: -.6px; line-height: 1.05; }
+.review-flight__now { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--ink-2); }
+.review-flight__graph { height: clamp(150px, 30vh, 280px); transform-origin: 0 0; cursor: default; will-change: transform; }
+.review-flight__trace { fill: none; stroke: var(--pen); stroke-width: 2; stroke-linejoin: round; transition: opacity .3s; }
+.review-flight[data-landing] .review-flight__trace { opacity: 0; }
+.review-flight__veil { position: absolute; top: 0; bottom: 0; right: -2px; border-left: 2px solid var(--pen); background: repeating-linear-gradient(-45deg, var(--paper-sunk) 0 7px, color-mix(in oklab, var(--rule) 70%, var(--paper-sunk)) 7px 8px); transition: left .5s cubic-bezier(.22,.8,.24,1), opacity .25s; }
+.review-flight[data-landing] .review-flight__veil { opacity: 0; }
+.review-flight__head-dot { position: absolute; left: -1px; width: 11px; height: 11px; border-radius: 50%; background: var(--pen); box-shadow: 0 0 0 3px color-mix(in oklab, var(--pen) 28%, transparent); transform: translate(-50%,-50%); transition: top .5s cubic-bezier(.22,.8,.24,1); animation: flight-pulse 1.2s ease-in-out infinite; }
+.review-flight__dot { animation: flight-pop .3s ease-out backwards; }
+.review-flight__footer { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: end; gap: 16px; }
+.review-flight__progress-label { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); font-size: 11px; margin-bottom: 8px; }
+.review-flight__footer .progress-bar__track { background: var(--paper-sunk); }
+.review-flight__footer .progress-bar__fill { background: var(--pen); }
+@keyframes flight-pulse { 50% { box-shadow: 0 0 0 7px color-mix(in oklab, var(--pen) 0%, transparent); } }
+@keyframes flight-pop { from { opacity: 0; transform: translate(-50%,-50%) scale(.2); } }
+@media (max-width: 560px) {
+  .review-flight { padding: 12px; }
+  .review-flight__stage { padding: 18px 16px 16px; gap: 14px; }
+  .review-flight__title { font-size: 19px; }
+  .review-flight__graph { height: clamp(140px, 26vh, 220px); }
+}
 
 /* Underlined tabs, like section marks in a notebook. */
 .panel-tabs { order: 2; min-width: 0; }
@@ -223,11 +254,6 @@
 .analysis-card__controls .toggle-button[data-selected="true"] { background: var(--ink); color: var(--paper); }
 .analysis-card__hint, .analysis-card__meta { font-size: 10px; color: var(--ink-3); line-height: 1.5; text-align: center; }
 .analysis-card__note { font-size: 12px; color: var(--pen-strong); }
-.analysis-card__progress { display: grid; gap: 14px; }
-.analysis-card__progress-label { display: flex; justify-content: space-between; gap: 12px; color: var(--ink-2); font-size: 11px; margin-bottom: 8px; }
-.analysis-card__progress .progress-bar__track { background: var(--paper-sunk); }
-.analysis-card__progress .progress-bar__fill { background: var(--pen); }
-.analysis-card__progress > .button { justify-self: end; }
 
 /* Summary */
 .summary { display: grid; gap: 24px; }

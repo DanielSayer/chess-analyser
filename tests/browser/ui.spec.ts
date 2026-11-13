@@ -192,6 +192,27 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByRole('option')).toHaveCount(4)
   })
 
+  test('the evaluation graph draws live in a centred overlay, then flies back to the panel', async ({ page }) => {
+    await mockChessCom(page)
+    await page.goto('/')
+    await importPlayer(page)
+    await gameOption(page, 'hasty_knight').click()
+    await page.getByRole('radio', { name: 'Standard' }).click()
+    await page.getByRole('button', { name: 'Review game' }).click()
+
+    const flight = page.getByRole('region', { name: 'Review in progress' })
+    await expect(flight).toBeVisible()
+    await expect(flight.getByLabel('Review progress')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Reviewing…' })).toBeDisabled()
+    // The trace appears once two positions are evaluated, before the review completes.
+    await expect(page.locator('.review-flight__trace')).toHaveCount(1, { timeout: 30_000 })
+    await page.screenshot({ path: `${SHOTS}/test-review-flight-desktop.png` })
+
+    await expect(page.getByTestId('accuracy-white')).toBeVisible({ timeout: 60_000 })
+    await expect(flight).toHaveCount(0)
+    await expect(page.getByRole('slider', { name: 'Evaluation graph' })).toBeVisible()
+  })
+
   test('cancelling a rerun keeps the completed review', async ({ page }) => {
     await mockChessCom(page)
     await page.goto('/')
