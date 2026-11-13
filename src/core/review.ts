@@ -91,8 +91,9 @@ export async function analyseGame(game: ImportedGame, options: AnalyseOptions = 
     options.onProgress?.({ completed: 0, total: fens.length, percent: 0 })
     for (const fen of fens) {
       options.signal?.throwIfAborted()
-      positions.push(await engine.evaluate(fen, { preset, signal: options.signal }))
-      options.onProgress?.({ completed: positions.length, total: fens.length, percent: Math.round(positions.length / fens.length * 100) })
+      const position = await engine.evaluate(fen, { preset, signal: options.signal })
+      positions.push(position)
+      options.onProgress?.({ completed: positions.length, total: fens.length, percent: Math.round(positions.length / fens.length * 100), position })
     }
     options.signal?.throwIfAborted()
     return buildReview(game, positions, preset)

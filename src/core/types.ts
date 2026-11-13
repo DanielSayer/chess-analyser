@@ -101,6 +101,8 @@ export interface AnalysisProgress {
   completed: number
   total: number
   percent: number
+  /** The evaluation just completed, in game order. Absent before the first one. */
+  position?: PositionEvaluation
 }
 
 export interface OperationOptions {

@@ -1,11 +1,14 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import type { AnalysisPreset, AnalysisProgress, GameReview, ImportedGame } from '../core'
+import type { AnalysisPreset, AnalysisProgress, GameReview, ImportedGame, PositionEvaluation } from '../core'
 import { analyseGame, loadReview, saveReview } from '../core'
 import { errorMessage, isAbortError } from '../ui/format'
 
 export interface ReviewRun {
+  id: number
   preset: AnalysisPreset
   progress: AnalysisProgress | null
+  /** Evaluations finished so far, in game order. Display only, never a review. */
+  positions: PositionEvaluation[]
 }
 
 export interface ReviewState {
@@ -75,12 +78,17 @@ export function useGameReview(game: ImportedGame, { cached, onComplete, onSaved,
     const id = ++nextRun.current
     runRef.current = { id, controller }
     const current = () => runRef.current?.id === id && !controller.signal.aborted
-    setState(s => ({ ...s, run: { preset, progress: null }, error: null, cancelled: false }))
+    setState(s => ({ ...s, run: { id, preset, progress: null, positions: [] }, error: null, cancelled: false }))
     analyseGame(game, {
       preset,
       signal: controller.signal,
       onProgress: progress => {
-        if (current()) setState(s => (s.run ? { ...s, run: { ...s.run, progress } } : s))
+        if (!current()) return
+        setState(s => {
+          if (s.run?.id !== id) return s
+          const positions = progress.position ? [...s.run.positions, progress.position] : s.run.positions
+          return { ...s, run: { ...s.run, progress, positions } }
+        })
       },
     })
       .then(review => {
