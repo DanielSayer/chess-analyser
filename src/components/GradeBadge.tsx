@@ -1,3 +1,4 @@
+import { BookOpen } from 'lucide-react'
 import type { MoveGrade } from '../core'
 import { GRADES } from '../ui/format'
 
@@ -11,7 +12,7 @@ export function GradeBadge({ grade, size = 'md' }: { grade: MoveGrade; size?: 's
       aria-label={meta.label}
       title={meta.label}
     >
-      {meta.symbol}
+      {grade === 'book' ? <BookOpen size="1.15em" strokeWidth={2.75} aria-hidden /> : meta.symbol}
     </span>
   )
 }

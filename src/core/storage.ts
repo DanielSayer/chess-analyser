@@ -2,6 +2,7 @@ import { openDB } from 'idb'
 import type { DBSchema, IDBPDatabase } from 'idb'
 import { normaliseUsername } from './chesscom'
 import { ENGINE_NAME } from './engine'
+import { buildGradedReview, REVIEW_VERSION } from './review'
 import type { GameReview, ImportedGame } from './types'
 
 interface AnalyserDB extends DBSchema {
@@ -45,13 +46,22 @@ export async function saveReview(review: GameReview): Promise<void> {
 }
 
 export function isReviewForGame(review: GameReview, game: ImportedGame): boolean {
-  return review.version === 1 && review.engine === ENGINE_NAME && review.gameId === game.id && review.pgn === game.pgn &&
+  return (review.version === 1 || review.version === REVIEW_VERSION) && review.engine === ENGINE_NAME && review.gameId === game.id && review.pgn === game.pgn &&
     Array.isArray(review.moves) && review.moves.length > 0 && Array.isArray(review.positions) && review.positions.length === review.moves.length + 1
 }
 
 export async function loadReview(game: ImportedGame): Promise<GameReview | null> {
   const review = await (await db()).get('reviews', game.id)
-  return review && isReviewForGame(review, game) ? review : null
+  if (!review || !isReviewForGame(review, game)) return null
+  if (review.version === REVIEW_VERSION) return review
+  // Grading changed but the engine work did not: regrade from stored positions.
+  try {
+    const regraded = { ...await buildGradedReview(game, review.positions, review.preset), createdAt: review.createdAt }
+    await saveReview(regraded)
+    return regraded
+  } catch {
+    return review
+  }
 }
 
 export async function loadReviewedIds(): Promise<string[]> {

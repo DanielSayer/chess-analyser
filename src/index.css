@@ -83,6 +83,7 @@ html[data-theme="dark"] {
   --radius: 0.5rem;
   --board-light: #e7ecec;
   --board-dark: #5f8a83;
+  --grade-book: #a5815a;
   --grade-best: #2e9f74;
   --grade-excellent: #5fae9c;
   --grade-good: #969ca5;

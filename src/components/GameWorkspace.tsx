@@ -409,7 +409,9 @@ function MoveInsight({ parsed, review, index, replay, lines, running }: {
         {after && <span className="eval-chip tabular">{formatEval(after)}</span>}
       </div>
       {reviewed ? (
-        reviewed.grade !== 'best' && reviewed.grade !== 'forced' && reviewed.bestSan ? (
+        reviewed.grade === 'book' ? (
+          <p className="muted">Opening theory{review?.opening ? ` · ${review.opening}` : ''}.</p>
+        ) : reviewed.grade !== 'best' && reviewed.grade !== 'forced' && reviewed.bestSan ? (
           <div className="insight__best">
             <p>
               Best was <strong>{reviewed.bestSan}</strong>

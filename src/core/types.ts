@@ -1,6 +1,6 @@
 export type Side = 'white' | 'black'
 export type AnalysisPreset = 'quick' | 'standard' | 'deep'
-export type MoveGrade = 'best' | 'excellent' | 'good' | 'inaccuracy' | 'mistake' | 'blunder' | 'forced'
+export type MoveGrade = 'book' | 'best' | 'excellent' | 'good' | 'inaccuracy' | 'mistake' | 'blunder' | 'forced'
 
 export interface Player {
   username: string
@@ -78,7 +78,8 @@ export interface SideSummary {
 }
 
 export interface GameReview {
-  version: 1
+  /** 1: pre-book grading. 2: book moves and Chess.com expected-points bands. */
+  version: 1 | 2
   engine: string
   gameId: string
   /** Binds cached results to exact immutable game input. */

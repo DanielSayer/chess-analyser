@@ -69,6 +69,15 @@ test.describe('mocked Chess.com import', () => {
     await expect(page.getByRole('option', { name: /against hasty_knight.*, reviewed/ })).toBeVisible()
     await page.getByRole('button', { name: 'Game review', exact: true }).click()
 
+    // Opening theory is graded as book rather than judged by the engine.
+    await page.getByRole('heading', { name: /Italian Game/ }).click()
+    await page.keyboard.press('Home')
+    await page.keyboard.press('ArrowRight')
+    await expect(position).toHaveText('1. e4')
+    await expect(page.getByLabel('Selected move')).toContainText('Book')
+    await expect(page.locator('[data-square="e4"]').getByRole('img', { name: 'Book', exact: true })).toBeVisible()
+    await page.screenshot({ path: `${SHOTS}/test-book-desktop.png` })
+
     // Black's 3... Nf6 allowed mate, so it is a critical moment.
     await page.getByRole('button', { name: /3… Nf6/ }).click()
     await expect(position).toHaveText('3… Nf6')

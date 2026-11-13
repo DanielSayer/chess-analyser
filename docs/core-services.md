@@ -35,7 +35,7 @@ Import from `src/core/index.ts`. The core has no React dependency. All request a
 
 ## Scoring
 
-The move-accuracy equations come from https://lichess.org/page/accuracy. Game accuracy is our arithmetic mean of move accuracy. It is neither Chess.com's proprietary score nor Lichess's volatility-weighted game score. Grades use our thresholds of winning-chance loss. We do not invent a brilliant-move detector or a performance rating. Explain this briefly where users inspect accuracy details, without filling the normal review flow with implementation text.
+The move-accuracy equations come from https://lichess.org/page/accuracy. Game accuracy is our arithmetic mean of move accuracy. It is neither Chess.com's proprietary score nor Lichess's volatility-weighted game score. Grades use Chess.com's published expected-points bands on the Lichess winning-chance scale (`GRADE_THRESHOLDS`). A leading run of moves into positions from the bundled Lichess opening catalogue is graded `book` and not judged, unless a move loses 10% or more. `analyseGame` loads the book lazily via `loadOpeningBook()`; `buildReview` takes it as an optional argument. `REVIEW_VERSION` is 2; `loadReview` regrades version-1 reviews from their stored positions without re-running the engine. We do not invent a brilliant-move detector or a performance rating. Explain this briefly where users inspect accuracy details, without filling the normal review flow with implementation text.
 
 ## Validation
 

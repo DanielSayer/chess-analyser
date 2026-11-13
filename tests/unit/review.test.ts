@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseGame, lineToSan } from '../../src/core/game'
 import { accuracyForLoss, buildReview, gradeMove, winningChance } from '../../src/core/review'
+import { isBookPosition, loadOpeningBook } from '../../src/core/book'
 import { isReviewForGame } from '../../src/core/storage'
 import type { PositionEvaluation } from '../../src/core/types'
 import { TEST_GAME } from '../fixtures/games'
@@ -25,6 +26,38 @@ describe('game review', () => {
     expect(gradeMove(20, false)).toBe('blunder')
     expect(gradeMove(20, true)).toBe('best')
     expect(gradeMove(20, false, true)).toBe('forced')
+  })
+
+  it("uses Chess.com's expected-points bands", () => {
+    expect([1.9, 2, 4.9, 5, 9.9, 10, 19.9, 20].map(loss => gradeMove(loss, false)))
+      .toEqual(['excellent', 'good', 'good', 'inaccuracy', 'inaccuracy', 'mistake', 'mistake', 'blunder'])
+  })
+
+  function evaluate(pgn: string, centipawns: number[]): { game: typeof TEST_GAME; positions: PositionEvaluation[] } {
+    const parsed = parseGame(pgn)
+    const fens = [parsed.initialFen, ...parsed.plies.map(ply => ply.after)]
+    return {
+      game: { ...TEST_GAME, pgn },
+      positions: fens.map((fen, i) => ({ fen, centipawns: centipawns[i], mate: null, depth: 10, moves: [], lines: [], bestMove: null })),
+    }
+  }
+
+  it('grades opening theory as book until the game leaves it', async () => {
+    const book = await loadOpeningBook()
+    expect(isBookPosition(book, parseGame('1. e4 d5').plies[1].after)).toBe(true)
+    // 1...d5 drops ~4 points of winning chance at shallow depth: theory, not an inaccuracy.
+    // 3. h4 leaves the book; 3...Qe5+ is not theory after it either.
+    const { game, positions } = evaluate('1. e4 d5 2. exd5 Qxd5 3. h4 Qe5+', [20, 30, 90, 80, 80, 20, 20])
+    const review = buildReview(game, positions, 'quick', book)
+    expect(review.moves.map(move => move.grade)).toEqual(['book', 'book', 'book', 'book', 'inaccuracy', 'excellent'])
+    expect(review.moves[1]).toMatchObject({ accuracy: 100, winningChanceLoss: 0 })
+    expect(review.white.counts.book).toBe(2)
+  })
+
+  it("still grades a costly book move, so named traps like Fool's Mate are blunders", async () => {
+    const book = await loadOpeningBook()
+    const review = buildReview(TEST_GAME, positions(), 'quick', book)
+    expect(review.moves.map(move => move.grade)).toEqual(['book', 'book', 'blunder', 'best'])
   })
 
   function positions(): PositionEvaluation[] {

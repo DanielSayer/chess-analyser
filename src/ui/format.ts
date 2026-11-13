@@ -101,6 +101,7 @@ export interface GradeMeta {
 }
 
 export const GRADES: Record<MoveGrade, GradeMeta> = {
+  book: { label: 'Book', symbol: '', tone: 'var(--grade-book)' },
   best: { label: 'Best', symbol: '★', tone: 'var(--grade-best)' },
   excellent: { label: 'Excellent', symbol: '✓', tone: 'var(--grade-excellent)' },
   good: { label: 'Good', symbol: '•', tone: 'var(--grade-good)' },
@@ -110,7 +111,7 @@ export const GRADES: Record<MoveGrade, GradeMeta> = {
   forced: { label: 'Forced', symbol: '→', tone: 'var(--grade-forced)' },
 }
 
-export const GRADE_ORDER: MoveGrade[] = ['best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder', 'forced']
+export const GRADE_ORDER: MoveGrade[] = ['book', 'best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder', 'forced']
 
 /** "12." for White's twelfth move, "12…" for Black's. */
 export function moveNumber(ply: number): string {

@@ -44,7 +44,7 @@ PGNs are parsed with chess.js. Stockfish 19 Lite, pinned to Stockfish.js 19.0.1,
 
 ## Scoring and current limits
 
-Move accuracy uses the [published Lichess winning-chance and move-accuracy equations](https://lichess.org/page/accuracy). Game accuracy is this app's arithmetic mean of move accuracy. It is neither Chess.com's proprietary accuracy nor Lichess's weighted game-accuracy score. Move grades use this app's winning-chance-loss thresholds. There is no claimed brilliant-move detector or estimated performance rating.
+Move accuracy uses the [published Lichess winning-chance and move-accuracy equations](https://lichess.org/page/accuracy). Game accuracy is this app's arithmetic mean of move accuracy. It is neither Chess.com's proprietary accuracy nor Lichess's weighted game-accuracy score. Move grades apply [Chess.com's published expected-points bands](https://support.chess.com/en/articles/8572705) (2 / 5 / 10 / 20% winning-chance loss for Excellent / Good / Inaccuracy / Mistake / Blunder) to the Lichess winning-chance curve, not Chess.com's rating-aware model. Opening theory from the [Lichess opening catalogue](https://github.com/lichess-org/chess-openings) (CC0, bundled) is graded Book, unless the move costs a mistake or worse (catalogued traps such as Fool's Mate). Regenerate it with `node scripts/build-openings.mjs`. There is no claimed brilliant-move detector or estimated performance rating.
 
 Analysis speed depends on the user's device. Each preset limits both search depth and time per position, so the achieved depth can be lower than the selected target. The lite engine uses a smaller network than full Stockfish. Results can change with search settings.
 
