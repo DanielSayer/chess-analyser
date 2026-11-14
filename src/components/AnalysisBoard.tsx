@@ -1,6 +1,6 @@
 import { Chess } from 'chess.js'
 import type { Square } from 'chess.js'
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { Chessboard } from 'react-chessboard'
 import type { MoveGrade, Side } from '../core'
@@ -36,6 +36,8 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
   const chess = useMemo(() => new Chess(fen), [fen])
   const selected = selection?.fen === fen ? selection.square : null
   const turn = chess.turn()
+  // Was the dragged piece already selected? A press-and-release on it then deselects, like a click.
+  const reselected = useRef(false)
 
   const targets = useMemo(() => {
     if (!selected) return []
@@ -48,7 +50,11 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
     squareStyles[lastMove.to] = LAST_MOVE(lastMove.to)
   }
   if (selected) squareStyles[selected] = SELECTED(selected)
-  for (const move of targets) squareStyles[move.to] = move.captured ? CAPTURE : TARGET
+  const hints = new Map<string, 'move' | 'capture'>()
+  for (const move of targets) {
+    hints.set(move.to, move.captured ? 'capture' : 'move')
+    squareStyles[move.to] = move.captured ? CAPTURE : TARGET
+  }
 
   const ownPiece = (square: string) => chess.get(square as Square)?.color === turn
 
@@ -65,7 +71,7 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
         clearArrowsOnPositionChange: true,
         squareStyles,
         squareRenderer: ({ square, children }) => (
-          <div className="board-square" style={squareStyles[square]}>
+          <div className="board-square" style={squareStyles[square]} data-hint={hints.get(square)}>
             {children}
             {moveGrade && square === lastMove?.to && <GradeBadge grade={moveGrade} size="board" />}
           </div>
@@ -76,10 +82,21 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
         darkSquareNotationStyle: { color: 'var(--board-light)', fontWeight: 600 },
         boardStyle: { borderRadius: 2, overflow: 'hidden' },
         dropSquareStyle: { boxShadow: 'inset 0 0 0 3px rgba(224, 80, 31, 0.8)' },
+        dragActivationDistance: 5,
         canDragPiece: ({ piece }) => piece.pieceType[0] === turn,
+        // Show a piece's moves as soon as it is picked up, so a jittery click still selects it.
+        onPieceDrag: ({ square }) => {
+          if (!square) return
+          reselected.current = square === selected
+          setSelection({ fen, square })
+        },
         onPieceDrop: ({ sourceSquare, targetSquare }) => {
+          if (!targetSquare || targetSquare === sourceSquare) {
+            if (reselected.current) setSelection(null)
+            return false
+          }
           setSelection(null)
-          return targetSquare ? onMove(sourceSquare, targetSquare) : false
+          return onMove(sourceSquare, targetSquare)
         },
         onSquareClick: ({ square }) => {
           if (selected && targets.some(move => move.to === square)) {

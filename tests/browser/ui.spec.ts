@@ -287,6 +287,43 @@ test.describe('mocked Chess.com import', () => {
     await expect(root).toHaveAttribute('data-theme', 'light')
   })
 
+  test('picking up a piece shows its legal moves, even with a jittery click', async ({ page }) => {
+    await mockChessCom(page)
+    await page.goto('/')
+    await importPlayer(page)
+    await gameOption(page, 'rook_lift').click()
+    const hints = page.locator('[data-hint]')
+    const centre = async (square: string) => {
+      const box = (await page.locator(`[data-square="${square}"]`).boundingBox())!
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+    }
+    const g1 = await centre('g1')
+
+    // A click that wobbles past the drag threshold still selects the knight.
+    await page.mouse.move(g1.x, g1.y)
+    await page.mouse.down()
+    await page.mouse.move(g1.x + 6, g1.y + 6, { steps: 3 })
+    await page.mouse.up()
+    await expect(hints).toHaveCount(2)
+    await expect(page.locator('[data-square="f3"] [data-hint="move"]')).toHaveCount(1)
+
+    // Clicking the selected piece again clears the hints. dnd-kit swallows clicks for 50 ms after a drag.
+    await page.waitForTimeout(100)
+    await page.locator('[data-square="g1"]').click()
+    await expect(hints).toHaveCount(0)
+
+    // Hints show while dragging, and dropping on one plays the move.
+    const f3 = await centre('f3')
+    await page.mouse.move(g1.x, g1.y)
+    await page.mouse.down()
+    await page.mouse.move(g1.x, g1.y - 20, { steps: 4 })
+    await expect(hints).toHaveCount(2)
+    await page.mouse.move(f3.x, f3.y, { steps: 6 })
+    await page.mouse.up()
+    await expect(page.locator('[data-square="f3"] [data-piece="wN"]')).toBeVisible()
+    await expect(hints).toHaveCount(0)
+  })
+
   for (const viewport of [{ name: 'wide', width: 1910, height: 1067 }, { name: 'desktop', width: 1440, height: 900 }, { name: 'tablet', width: 1024, height: 900 }, { name: 'mobile', width: 390, height: 844 }]) {
     test(`has no horizontal overflow on ${viewport.name}`, async ({ page }) => {
       await page.setViewportSize(viewport)
