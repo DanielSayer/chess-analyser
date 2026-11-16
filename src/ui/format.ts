@@ -111,7 +111,7 @@ export const GRADES: Record<MoveGrade, GradeMeta> = {
   forced: { label: 'Forced', symbol: '→', tone: 'var(--grade-forced)' },
 }
 
-export const GRADE_ORDER: MoveGrade[] = ['book', 'best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder', 'forced']
+export const GRADE_ORDER: MoveGrade[] = ['best', 'excellent', 'good', 'book', 'inaccuracy', 'mistake', 'blunder', 'forced']
 
 /** "12." for White's twelfth move, "12…" for Black's. */
 export function moveNumber(ply: number): string {
