@@ -32,8 +32,17 @@ const isDark = (square: string) => (square.charCodeAt(0) - 96 + Number(square[1]
 const tint = (light: string, dark: string) => (square: string): CSSProperties => ({ background: isDark(square) ? dark : light })
 const LAST_MOVE = tint('#f5d98c', '#d6ad5c')
 const SELECTED = tint('#f6b99c', '#dc8a62')
+// A red glow under a checked king, layered over whatever tint the square has.
+const CHECK_GLOW = 'radial-gradient(circle, #e8302a 0%, #e8302ae6 40%, #e8302a00 88%)'
 const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(31, 27, 22, 0.32) 22%, transparent 24%)' }
 const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(31, 27, 22, 0.32) 60%)' }
+
+function kingSquare(chess: Chess, color: 'w' | 'b'): string | null {
+  for (const rank of chess.board()) {
+    for (const piece of rank) if (piece?.type === 'k' && piece.color === color) return piece.square
+  }
+  return null
+}
 
 export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, animate, onMove, id = 'analysis-board', interactive = true }: Props) {
   const [selection, setSelection] = useState<{ fen: string; square: string } | null>(null)
@@ -54,6 +63,11 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
     squareStyles[lastMove.to] = LAST_MOVE(lastMove.to)
   }
   if (selected) squareStyles[selected] = SELECTED(selected)
+  const checked = chess.inCheck() ? kingSquare(chess, turn) : null
+  if (checked) {
+    const base = squareStyles[checked]?.background ?? (isDark(checked) ? 'var(--board-dark)' : 'var(--board-light)')
+    squareStyles[checked] = { background: `${CHECK_GLOW}, ${base}` }
+  }
   const hints = new Map<string, 'move' | 'capture'>()
   for (const move of targets) {
     hints.set(move.to, move.captured ? 'capture' : 'move')
@@ -75,7 +89,7 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
         clearArrowsOnPositionChange: true,
         squareStyles,
         squareRenderer: ({ square, children }) => (
-          <div className="board-square" style={squareStyles[square]} data-hint={hints.get(square)}>
+          <div className="board-square" style={squareStyles[square]} data-hint={hints.get(square)} data-check={square === checked || undefined}>
             {children}
             {moveGrade && square === lastMove?.to && <GradeBadge grade={moveGrade} size="board" />}
           </div>

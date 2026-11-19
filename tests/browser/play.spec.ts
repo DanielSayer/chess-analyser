@@ -98,12 +98,17 @@ test("ends on checkmate, then resignation and agreed draws can be taken back", a
   await openPlay(page)
   await play(page, 'f2f3', 'e7e5', 'g2g4', 'd8h4')
   await expect(page.getByRole('region', { name: 'Result' })).toContainText('0-1')
+  // The checked king's square is highlighted, here and in earlier checks.
+  await expect(board(page).locator('[data-check]')).toHaveCount(1)
+  await expect(board(page).locator('[data-square="e1"] [data-check]')).toHaveCount(1)
+  await page.screenshot({ path: `${SHOTS}/play-check.png` })
   await expect(page.getByRole('status').filter({ hasText: 'Black wins by checkmate' })).toBeVisible()
   await expect(board(page).locator('[data-square="e2"] [data-piece]')).toHaveCount(1)
   await board(page).locator('[data-square="e2"]').click()
   await expect(board(page).locator('[data-hint]')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Undo' }).click()
+  await expect(board(page).locator('[data-check]')).toHaveCount(0)
   await page.getByRole('button', { name: 'Resign' }).click()
   await page.getByRole('button', { name: 'Black resigns' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'White wins by resignation' })).toBeVisible()
