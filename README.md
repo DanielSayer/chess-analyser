@@ -25,6 +25,7 @@ The `predev` and `prebuild` scripts copy the pinned Stockfish JavaScript, WebAss
 - Legal move exploration with up to three local engine lines and a return to the played game.
 - Progress, cancellation, retries and completed-review preservation after failed or cancelled reruns.
 - Local persistence, an in-memory fallback when browser storage is unavailable, and an explicit clear-data action.
+- A **Play** page for two players on one device: legal-move hints, promotion choice, board flipping (manual or after every move), an evaluation bar, live move grades, a graded scoresheet with history navigation, undo, resign, agreed draws, PGN copy and automatic saving in this browser. No matchmaking and no network requests.
 - Responsive desktop and mobile layouts, with an About dialog for shortcuts, scoring and engine licences.
 
 ## Architecture and data
@@ -45,6 +46,8 @@ PGNs are parsed with chess.js. Stockfish 19 Lite, pinned to Stockfish.js 19.0.1,
 ## Scoring and current limits
 
 Move accuracy uses the [published Lichess winning-chance and move-accuracy equations](https://lichess.org/page/accuracy). Game accuracy is this app's arithmetic mean of move accuracy. It is neither Chess.com's proprietary accuracy nor Lichess's weighted game-accuracy score. Move grades apply [Chess.com's published expected-points bands](https://support.chess.com/en/articles/8572705) (2 / 5 / 10 / 20% winning-chance loss for Excellent / Good / Inaccuracy / Mistake / Blunder) to the Lichess winning-chance curve, not Chess.com's rating-aware model. Opening theory from the [Lichess opening catalogue](https://github.com/lichess-org/chess-openings) (CC0, bundled) is graded Book, unless the move costs a mistake or worse (catalogued traps such as Fool's Mate). Regenerate it with `node scripts/build-openings.mjs`. There is no claimed brilliant-move detector or estimated performance rating.
+
+Play-page grades add a second, centipawn measure because winning chances saturate: at +10 almost any move keeps ~100% and would grade Excellent. The centipawn loss against the best move is graded on 30 / 70 / 150 / 300 cp bands, widened by one multiple for every 6 pawns of advantage (scores beyond 12 pawns, and forced mates, count as 12). Each move gets the worse of the two grades, so dropping a rook at +10 is still a mistake, while near equality the winning-chance bands decide as before. When the played move is among the engine's three lines, both moves are scored from that one search. Imported-game reviews still use winning-chance bands only.
 
 Analysis speed depends on the user's device. Each preset limits both search depth and time per position, so the achieved depth can be lower than the selected target. The lite engine uses a smaller network than full Stockfish. Results can change with search settings.
 

@@ -45,7 +45,7 @@ export function AboutDialog({ hasLocalData, onClear }: Props) {
                 <h3>Scores</h3>
                 <p>
                   Accuracy and move grades are this app's own measures, based on the published Lichess move-accuracy
-                  formula. They are not Chess.com's scores and will differ from them.
+                  formula. They are not Chess.com's scores and will differ from them. On the Play page, grades also count the centipawns a move gives away, so moves in a won position are still judged.
                 </p>
               </section>
               <section>
