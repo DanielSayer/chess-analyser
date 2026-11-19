@@ -1,16 +1,18 @@
 import { Button } from '@heroui/react'
-import { BarChart3, House, Moon, Sun } from 'lucide-react'
+import { BarChart3, House, Moon, Sun, Swords } from 'lucide-react'
 import type { Theme } from '../hooks/useTheme'
 import { AboutDialog } from './AboutDialog'
 import { Logo } from './Logo'
 
+export type View = 'games' | 'board' | 'play'
+
 interface Props {
-  view: 'games' | 'board'
+  view: View
   canReview: boolean
   hasLocalData: boolean
   theme: Theme
   onTheme: (theme: Theme) => void
-  onNavigate: (view: 'games' | 'board') => void
+  onNavigate: (view: View) => void
   onClear: () => Promise<string | null>
 }
 
@@ -28,6 +30,9 @@ export function Navigation({ view, canReview, hasLocalData, theme, onTheme, onNa
         </Button>
         <Button variant="ghost" className="nav-link" aria-label="Game review" aria-current={view === 'board' ? 'page' : undefined} isDisabled={!canReview} onPress={() => onNavigate('board')}>
           <span className="nav-link__no" aria-hidden="true">02</span><BarChart3 size={19} strokeWidth={1.8} /><span>Game review</span>
+        </Button>
+        <Button variant="ghost" className="nav-link" aria-label="Play" aria-current={view === 'play' ? 'page' : undefined} onPress={() => onNavigate('play')}>
+          <span className="nav-link__no" aria-hidden="true">03</span><Swords size={19} strokeWidth={1.8} /><span>Play</span>
         </Button>
       </nav>
       <div className="navigation__bottom">
