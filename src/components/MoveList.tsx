@@ -1,10 +1,13 @@
 import { useEffect, useRef } from 'react'
-import type { GameReview, ParsedPly } from '../core'
+import type { MoveGrade, ParsedPly } from '../core'
 import { GradeBadge } from './GradeBadge'
 
 interface Props {
-  plies: ParsedPly[]
-  review: GameReview | null
+  plies: Pick<ParsedPly, 'ply' | 'san' | 'side'>[]
+  /** Grade per ply, in game order. Missing entries show no badge. */
+  grades: readonly (MoveGrade | null | undefined)[]
+  /** Badge every graded move, not only notable ones. */
+  showAll?: boolean
   index: number
   inVariation: boolean
   onSelect: (index: number) => void
@@ -12,7 +15,7 @@ interface Props {
 
 const QUIET = new Set(['best', 'excellent', 'good', 'forced'])
 
-export function MoveList({ plies, review, index, inVariation, onSelect }: Props) {
+export function MoveList({ plies, grades, showAll = false, index, inVariation, onSelect }: Props) {
   const ref = useRef<HTMLOListElement>(null)
 
   useEffect(() => {
@@ -25,7 +28,7 @@ export function MoveList({ plies, review, index, inVariation, onSelect }: Props)
     else if (top + active.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = top + active.offsetHeight - list.clientHeight + 8
   }, [index])
 
-  const rows: ParsedPly[][] = []
+  const rows: Props['plies'][] = []
   for (let i = 0; i < plies.length; i += 2) rows.push(plies.slice(i, i + 2))
   const startsWithBlack = plies[0]?.side === 'black'
 
@@ -36,8 +39,8 @@ export function MoveList({ plies, review, index, inVariation, onSelect }: Props)
           <span className="move-list__no tabular">{r + 1}.</span>
           {startsWithBlack && r === 0 && <span className="move-list__cell" />}
           {row.map(ply => {
-            const reviewed = review?.moves[ply.ply - 1]
-            const showBadge = reviewed && !QUIET.has(reviewed.grade)
+            const grade = grades[ply.ply - 1]
+            const showBadge = grade && (showAll || !QUIET.has(grade))
             return (
               <button
                 key={ply.ply}
@@ -47,7 +50,7 @@ export function MoveList({ plies, review, index, inVariation, onSelect }: Props)
                 onClick={() => onSelect(ply.ply)}
               >
                 <span className="move__san">{ply.san}</span>
-                {reviewed && showBadge && <GradeBadge grade={reviewed.grade} size="sm" />}
+                {showBadge && <GradeBadge grade={grade} size="sm" />}
               </button>
             )
           })}

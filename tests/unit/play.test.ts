@@ -18,8 +18,8 @@ function plies(sans: string[], start = START_FEN): ParsedPly[] {
   const result: ParsedPly[] = []
   let fen = start
   for (const san of sans) {
-    const chess = parseGame(`[FEN "${fen}"]\n[SetUp "1"]\n\n${san}`).plies[0]
-    const ply = playMove(fen, result.length + 1, { from: chess.uci.slice(0, 2), to: chess.uci.slice(2, 4), promotion: chess.uci[4] as 'q' | undefined })!
+    const move = new Chess(fen).move(san)
+    const ply = playMove(fen, result.length + 1, { from: move.from, to: move.to, promotion: move.promotion as 'q' | undefined })!
     result.push(ply)
     fen = ply.after
   }

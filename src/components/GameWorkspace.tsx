@@ -307,7 +307,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
             )}
           </Tabs.Panel>
           <Tabs.Panel id="moves" className="panel-tabs__panel">
-            <MoveList plies={parsed.plies} review={review} index={variation ? -1 : index} inVariation={variation !== null} onSelect={replay.goTo} />
+            <MoveList plies={parsed.plies} grades={review?.moves.map(move => move.grade) ?? []} index={variation ? -1 : index} inVariation={variation !== null} onSelect={replay.goTo} />
           </Tabs.Panel>
         </Tabs>
       </aside>

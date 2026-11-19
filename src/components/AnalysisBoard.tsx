@@ -21,6 +21,10 @@ interface Props {
   arrows: BoardArrow[]
   animate: boolean
   onMove: (from: string, to: string) => boolean
+  /** Unique per mounted board. */
+  id?: string
+  /** False makes the board view-only, e.g. after the game ends. */
+  interactive?: boolean
 }
 
 // Opaque tints per square colour, so highlights stay warm on teal.
@@ -31,10 +35,10 @@ const SELECTED = tint('#f6b99c', '#dc8a62')
 const TARGET: CSSProperties = { background: 'radial-gradient(circle, rgba(31, 27, 22, 0.32) 22%, transparent 24%)' }
 const CAPTURE: CSSProperties = { background: 'radial-gradient(circle, transparent 58%, rgba(31, 27, 22, 0.32) 60%)' }
 
-export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, animate, onMove }: Props) {
+export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, animate, onMove, id = 'analysis-board', interactive = true }: Props) {
   const [selection, setSelection] = useState<{ fen: string; square: string } | null>(null)
   const chess = useMemo(() => new Chess(fen), [fen])
-  const selected = selection?.fen === fen ? selection.square : null
+  const selected = interactive && selection?.fen === fen ? selection.square : null
   const turn = chess.turn()
   // Was the dragged piece already selected? A press-and-release on it then deselects, like a click.
   const reselected = useRef(false)
@@ -56,12 +60,12 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
     squareStyles[move.to] = move.captured ? CAPTURE : TARGET
   }
 
-  const ownPiece = (square: string) => chess.get(square as Square)?.color === turn
+  const ownPiece = (square: string) => interactive && chess.get(square as Square)?.color === turn
 
   return (
     <Chessboard
       options={{
-        id: 'analysis-board',
+        id,
         position: fen,
         boardOrientation: orientation,
         showAnimations: animate,
@@ -83,7 +87,7 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
         boardStyle: { borderRadius: 2, overflow: 'hidden' },
         dropSquareStyle: { boxShadow: 'inset 0 0 0 3px rgba(224, 80, 31, 0.8)' },
         dragActivationDistance: 5,
-        canDragPiece: ({ piece }) => piece.pieceType[0] === turn,
+        canDragPiece: ({ piece }) => interactive && piece.pieceType[0] === turn,
         // Show a piece's moves as soon as it is picked up, so a jittery click still selects it.
         onPieceDrag: ({ square }) => {
           if (!square) return
