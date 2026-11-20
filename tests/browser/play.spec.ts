@@ -88,10 +88,53 @@ test('auto-flip turns the board to the side to move and hiding analysis hides th
   await play(page, 'd7d5')
   await expect.poll(async () => (await a1())!.y).toBe(whiteBottom)
 
-  await page.getByText('Show evaluation and grades').click()
+  await page.getByText('Engine analysis').click()
   await expect(page.getByRole('meter', { name: 'Evaluation' })).toHaveCount(0)
   await expect(page.locator('.grade-badge')).toHaveCount(0)
-  await expect(page.getByText('Analysis is hidden.')).toBeVisible()
+  await expect(page.getByText('Engine off.')).toBeVisible()
+})
+
+test('the engine button stops analysis, then catches up when turned back on', async ({ page }) => {
+  await openPlay(page)
+  const engine = page.getByRole('button', { name: 'Engine', exact: true })
+  await expect(engine).toHaveAttribute('aria-pressed', 'true')
+  await engine.click()
+  await expect(engine).toHaveAttribute('aria-pressed', 'false')
+  await expect(page.getByRole('button', { name: 'Show best move' })).toBeDisabled()
+  await play(page, 'e2e4', 'e7e5', 'd1h5')
+  await expect(page.getByRole('meter', { name: 'Evaluation' })).toHaveCount(0)
+  await expect(page.locator('.grade-badge')).toHaveCount(0)
+  // Nothing after the start position (perhaps finished before switching off) was analysed.
+  await page.waitForTimeout(1500)
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('chess-analyser:play')!).evaluations.length)
+  expect(saved).toBeLessThanOrEqual(1)
+
+  await engine.click()
+  await expect(page.getByRole('list', { name: 'Moves' }).locator('.grade-badge')).toHaveCount(3, { timeout: 30_000 })
+  await expect(page.getByRole('meter', { name: 'Evaluation' })).toHaveAttribute('aria-valuetext', /White's view/)
+})
+
+test('sends the played game to the full review and back', async ({ page }) => {
+  await openPlay(page)
+  await expect(page.getByRole('button', { name: 'Review game' })).toBeDisabled()
+  await play(page, 'f2f3', 'e7e5', 'g2g4', 'd8h4')
+  await page.getByRole('button', { name: 'Review game' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Over-the-board game' })).toBeVisible()
+  await expect(page.getByLabel('Analysis workspace').locator('.game-header__meta')).toContainText('Black won by checkmate')
+  await expect(page.getByRole('link', { name: /Chess.com/ })).toHaveCount(0)
+  await page.getByRole('radio', { name: 'Quick' }).click()
+  await page.getByRole('button', { name: 'Review game' }).click()
+  await expect(page.getByTestId('accuracy-white')).toHaveText(/^\d+\.\d$/, { timeout: 60_000 })
+  await expect(page.getByRole('heading', { name: 'Critical moments' })).toBeVisible()
+  await page.screenshot({ path: `${SHOTS}/play-review.png` })
+
+  // The game is still on the Play page, and reviewing again after Undo starts fresh.
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
+  await page.getByRole('button', { name: 'Undo' }).click()
+  await page.getByRole('button', { name: 'Review game' }).click()
+  await expect(page.getByLabel('Analysis workspace').locator('.game-header__meta')).toContainText('Game in progress')
+  await expect(page.getByTestId('accuracy-white')).toHaveCount(0)
 })
 
 test("ends on checkmate, then resignation and agreed draws can be taken back", async ({ page }) => {

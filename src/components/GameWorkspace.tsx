@@ -31,6 +31,7 @@ interface Props {
   onReviewSaved: (gameId: string) => void
   onStorageIssue: () => void
   onBack?: () => void
+  backLabel?: string
   isActive?: boolean
 }
 
@@ -53,7 +54,7 @@ export function GameWorkspace(props: Props) {
   if (parsed instanceof Error) {
     return (
       <div className="workspace workspace--message">
-        <GameHeader game={props.game} onBack={props.onBack} />
+        <GameHeader game={props.game} onBack={props.onBack} backLabel={props.backLabel} />
         <Alert status="danger">
           <Alert.Indicator />
           <Alert.Content>
@@ -67,28 +68,30 @@ export function GameWorkspace(props: Props) {
   return <Workspace {...props} parsed={parsed} />
 }
 
-function GameHeader({ game, onBack }: { game: ImportedGame; onBack?: () => void }) {
+function GameHeader({ game, onBack, backLabel = 'Games' }: { game: ImportedGame; onBack?: () => void; backLabel?: string }) {
   return (
     <header className="game-header">
       {onBack && (
         <Button size="sm" variant="ghost" onPress={onBack} className="game-header__back">
-          <ArrowLeft size={16} /> Games
+          <ArrowLeft size={16} /> {backLabel}
         </Button>
       )}
       <div className="game-header__text">
         <h2 className="game-header__title">
-          {game.opening ?? 'Unknown opening'}
+          {game.opening ?? (game.source === 'local' ? 'Over-the-board game' : 'Unknown opening')}
           {game.eco && <span className="game-header__eco">{game.eco}</span>}
         </h2>
         <p className="game-header__meta">
-          <span>{capitalise(game.timeClass)} · {timeControlLabel(game)}</span>
+          <span>{game.source === 'local' ? 'Played on this device' : `${capitalise(game.timeClass)} · ${timeControlLabel(game)}`}</span>
           <span>{fullDate(game.endTime)}</span>
           <span><strong className="tabular">{scoreline(game)}</strong> {endingText(game)}</span>
         </p>
       </div>
-      <Link href={game.url} target="_blank" rel="noreferrer noopener" className="game-header__link">
-        Chess.com <ExternalLink size={13} aria-hidden="true" />
-      </Link>
+      {game.url && (
+        <Link href={game.url} target="_blank" rel="noreferrer noopener" className="game-header__link">
+          Chess.com <ExternalLink size={13} aria-hidden="true" />
+        </Link>
+      )}
     </header>
   )
 }
@@ -115,7 +118,7 @@ function PlayerStrip({ game, side, clock, accuracy, toMove }: {
   )
 }
 
-function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSaved, onStorageIssue, onBack, parsed, isActive = true }: Props & { parsed: ParsedGame }) {
+function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSaved, onStorageIssue, onBack, backLabel, parsed, isActive = true }: Props & { parsed: ParsedGame }) {
   const analysis = useGameReview(game, { cached: cachedReview, onComplete: onReviewComplete, onSaved: onReviewSaved, onStorageIssue })
   const replay = useReplay(parsed)
   const [flipped, setFlipped] = useState(false)
@@ -178,7 +181,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
   return (
     <div className="workspace">
       <div className="workspace__board">
-        <GameHeader game={game} onBack={onBack} />
+        <GameHeader game={game} onBack={onBack} backLabel={backLabel} />
         <div className="board-area">
           {strip(top)}
           <div className="board-row">

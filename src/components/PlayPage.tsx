@@ -1,12 +1,12 @@
 import { AlertDialog, Button, ButtonGroup, Label, Spinner, Switch, ToggleButton } from '@heroui/react'
 import {
-  ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ClipboardCopy, Flag, FlipVertical2, Handshake, Lightbulb, RotateCcw, Undo2,
+  BarChart3, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ClipboardCopy, Cpu, Flag, FlipVertical2, Handshake, Lightbulb, RotateCcw, Undo2,
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { defaultPieces } from 'react-chessboard'
-import type { GradedMove, MoveInput, OpeningBook, PositionEvaluation, Side } from '../core'
-import { START_FEN, endText, gradeGame, isPromotion, loadOpeningBook, material, toPgn } from '../core'
+import type { GradedMove, ImportedGame, MoveInput, OpeningBook, PositionEvaluation, Side } from '../core'
+import { START_FEN, endText, gradeGame, isPromotion, loadOpeningBook, material, toLocalGame, toPgn } from '../core'
 import { useLiveEvaluations } from '../hooks/useLiveEvaluations'
 import { inCheck, usePlayGame, usePlayPersistence } from '../hooks/usePlayGame'
 import type { PlayGame } from '../hooks/usePlayGame'
@@ -25,10 +25,10 @@ const PIECE_NAME = { q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight' }
 const other = (side: Side): Side => (side === 'white' ? 'black' : 'white')
 const capital = (side: Side) => (side === 'white' ? 'White' : 'Black')
 
-export function PlayPage({ isActive }: { isActive: boolean }) {
+export function PlayPage({ isActive, onReview }: { isActive: boolean; onReview: (game: ImportedGame, viewer: Side) => void }) {
   const game = usePlayGame()
   const { plies, fens, fen, cursor, live, end, turn, settings } = game
-  const engine = useLiveEvaluations(fens, fens.at(-1)!, game.initialEvaluations)
+  const engine = useLiveEvaluations(fens, fens.at(-1)!, game.initialEvaluations, settings.showAnalysis)
   usePlayPersistence(game, engine.evaluations)
 
   const [book, setBook] = useState<OpeningBook | undefined>()
@@ -117,6 +117,9 @@ export function PlayPage({ isActive }: { isActive: boolean }) {
             <ToggleButton isIconOnly size="sm" aria-label="Show best move" isSelected={settings.showHint} isDisabled={!showAnalysis} onChange={showHint => game.updateSettings({ showHint })}>
               <Lightbulb size={16} />
             </ToggleButton>
+            <ToggleButton isIconOnly size="sm" aria-label="Engine" isSelected={showAnalysis} onChange={on => game.updateSettings({ showAnalysis: on })}>
+              <Cpu size={16} />
+            </ToggleButton>
             <Button isIconOnly size="sm" variant="secondary" aria-label="Flip board" onPress={() => game.updateSettings({ orientation: other(orientation) })}>
               <FlipVertical2 size={16} />
             </Button>
@@ -148,7 +151,7 @@ export function PlayPage({ isActive }: { isActive: boolean }) {
           )}
         </section>
 
-        <GameActions game={game} />
+        <GameActions game={game} onReview={() => onReview(toLocalGame(game.id, game.startedAt, START_FEN, plies, end), orientation)} />
       </aside>
     </div>
   )
@@ -217,7 +220,7 @@ function MoveNote({ game, graded, evaluation, engineStatus, viewedTurn }: {
   }
   const ply = plies[cursor - 1]
   let body: ReactNode
-  if (!settings.showAnalysis) body = <p className="muted">Analysis is hidden. Turn it on below to see grades and the evaluation.</p>
+  if (!settings.showAnalysis) body = <p className="muted">Engine off. No evaluation, grades or hints until you turn it back on.</p>
   else if (!graded) body = engineStatus === 'error'
     ? <p className="muted">The engine could not analyse this position.</p>
     : <p className="muted play-thinking"><Spinner size="sm" color="current" /> Grading this move</p>
@@ -247,7 +250,7 @@ function MoveNote({ game, graded, evaluation, engineStatus, viewedTurn }: {
   )
 }
 
-function GameActions({ game }: { game: PlayGame }) {
+function GameActions({ game, onReview }: { game: PlayGame; onReview: () => void }) {
   const { plies, end, manualEnd, turn, settings } = game
   const [copied, setCopied] = useState<string | null>(null)
   const copyPgn = async () => {
@@ -302,8 +305,11 @@ function GameActions({ game }: { game: PlayGame }) {
           onConfirm={game.agreeDraw}
         />
       </div>
+      <Button variant={end ? 'primary' : 'secondary'} className="play-actions__review" onPress={onReview} isDisabled={!plies.length}>
+        <BarChart3 size={16} /> Review game
+      </Button>
       <div className="play-actions__settings">
-        <SettingSwitch label="Show evaluation and grades" isSelected={settings.showAnalysis} onChange={showAnalysis => game.updateSettings({ showAnalysis })} />
+        <SettingSwitch label="Engine analysis" isSelected={settings.showAnalysis} onChange={showAnalysis => game.updateSettings({ showAnalysis })} />
         <SettingSwitch label="Flip board after each move" isSelected={settings.autoFlip} onChange={autoFlip => game.updateSettings({ autoFlip, ...(autoFlip ? { orientation: turn } : {}) })} />
       </div>
       <Button size="sm" variant="ghost" className="play-actions__copy" onPress={copyPgn} isDisabled={!plies.length}>

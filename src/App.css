@@ -358,6 +358,7 @@
 .play-actions { gap: 14px; }
 .play-actions__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .play-actions__grid .button { width: 100%; gap: 7px; }
+.play-actions__review { width: 100%; gap: 7px; }
 .play-actions__settings { display: grid; gap: 10px; font-size: 13px; }
 .play-actions__copy { justify-self: center; gap: 6px; color: var(--ink-2); }
 .promotion { position: absolute; inset: 0; z-index: 10; display: grid; place-items: center; background: color-mix(in oklab, var(--paper-sunk) 55%, transparent); backdrop-filter: blur(2px); }

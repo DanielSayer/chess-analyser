@@ -4,7 +4,7 @@ import { isBookPosition } from './book'
 import type { OpeningBook } from './book'
 import { lineToSan, uciToSan } from './game'
 import { GRADE_THRESHOLDS, gradeMove, winningChance } from './review'
-import type { EngineLine, MoveGrade, ParsedPly, PositionEvaluation, Side } from './types'
+import type { EngineLine, ImportedGame, MoveGrade, ParsedPly, PositionEvaluation, Side } from './types'
 
 export const START_FEN = new Chess().fen()
 
@@ -93,6 +93,36 @@ export function toPgn(startFen: string, plies: ParsedPly[], end: GameEnd | null,
   chess.setHeader('Result', end?.result ?? '*')
   if (end && end.reason !== 'checkmate') chess.setHeader('Termination', endText(end))
   return chess.pgn()
+}
+
+// Chess.com's result codes, so reviews describe local games the same way.
+const LOSER_RESULT: Partial<Record<EndReason, string>> = { checkmate: 'checkmated', resignation: 'resigned' }
+const DRAW_RESULT: Record<EndReason, string> = {
+  checkmate: 'agreed', resignation: 'agreed', agreement: 'agreed', stalemate: 'stalemate',
+  repetition: 'repetition', insufficient: 'insufficient', 'fifty-move': '50move',
+}
+
+/** Wraps a game played on this device so the review workspace can analyse it. */
+export function toLocalGame(id: string, startedAt: number, startFen: string, plies: ParsedPly[], end: GameEnd | null): ImportedGame {
+  const result = (side: Side) => {
+    if (!end) return 'unfinished'
+    if (end.result === '1/2-1/2') return DRAW_RESULT[end.reason]
+    return (end.result === '1-0') === (side === 'white') ? 'win' : LOSER_RESULT[end.reason] ?? 'lose'
+  }
+  return {
+    id,
+    url: '',
+    pgn: toPgn(startFen, plies, end, new Date(startedAt)),
+    white: { username: 'White', rating: null, result: result('white') },
+    black: { username: 'Black', rating: null, result: result('black') },
+    endTime: Math.floor(Date.now() / 1000),
+    timeClass: 'over the board',
+    timeControl: '-',
+    rated: false,
+    opening: null,
+    eco: null,
+    source: 'local',
+  }
 }
 
 /* ------------------------------------------------------------------ Material */

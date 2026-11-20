@@ -19,6 +19,7 @@ export function outcomeFor(game: ImportedGame, username: string): Outcome {
 export function scoreline(game: ImportedGame): string {
   if (game.white.result === 'win') return '1-0'
   if (game.black.result === 'win') return '0-1'
+  if (game.white.result === 'unfinished') return '*'
   return '½-½'
 }
 
@@ -43,6 +44,7 @@ export function endingText(game: ImportedGame): string {
     const how = RESULT_TEXT[loser.result]
     return how ? `${winner} won by ${how}` : `${winner} won`
   }
+  if (game.white.result === 'unfinished') return 'Game in progress'
   const how = RESULT_TEXT[game.white.result]
   return how ? `Draw by ${how}` : 'Draw'
 }

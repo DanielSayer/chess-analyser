@@ -3,10 +3,11 @@ import { describe, expect, it } from 'vitest'
 import { loadOpeningBook } from '../../src/core/book'
 import { parseGame } from '../../src/core/game'
 import {
-  START_FEN, centipawnGrade, endText, gradeGame, gradePlayedMove, isPromotion, material, playMove, ruleEnding, toPgn,
+  START_FEN, centipawnGrade, endText, gradeGame, gradePlayedMove, isPromotion, material, playMove, ruleEnding, toLocalGame, toPgn,
 } from '../../src/core/play'
 import { gradeMove, winningChance } from '../../src/core/review'
 import type { EngineLine, ParsedPly, PositionEvaluation } from '../../src/core/types'
+import { endingText, scoreline } from '../../src/ui/format'
 
 function line(centipawns: number, moves: string[] = [], mate: number | null = null): EngineLine {
   return { centipawns: mate === null ? centipawns : Math.sign(mate) * 100_000, mate, depth: 14, moves }
@@ -53,6 +54,18 @@ describe('live play', () => {
     expect(pgn).toContain('[Result "1-0"]')
     expect(pgn).toContain('[Date "2026.11.20"]')
     expect(parseGame(pgn).plies.map(ply => ply.san)).toEqual(game.map(ply => ply.san))
+  })
+
+  it('wraps a played game for review with Chess.com-style results', () => {
+    const game = plies(['f3', 'e5', 'g4', 'Qh4#'])
+    const finished = toLocalGame('local-1', Date.UTC(2026, 10, 20, 12), START_FEN, game, ruleEnding(START_FEN, game))
+    expect(finished).toMatchObject({ id: 'local-1', url: '', source: 'local', white: { username: 'White', result: 'checkmated' }, black: { result: 'win' } })
+    expect(parseGame(finished.pgn).plies).toHaveLength(4)
+    expect([scoreline(finished), endingText(finished)]).toEqual(['0-1', 'Black won by checkmate'])
+    const ongoing = toLocalGame('local-1', Date.UTC(2026, 10, 20, 12), START_FEN, game.slice(0, 2), null)
+    expect([scoreline(ongoing), endingText(ongoing)]).toEqual(['*', 'Game in progress'])
+    const drawn = toLocalGame('local-1', 0, START_FEN, game.slice(0, 2), { result: '1/2-1/2', reason: 'agreement' })
+    expect([scoreline(drawn), endingText(drawn)]).toEqual(['½-½', 'Draw by agreement'])
   })
 
   it('counts captured pieces and the material lead', () => {

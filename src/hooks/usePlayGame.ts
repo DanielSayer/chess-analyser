@@ -8,12 +8,15 @@ export const PLAY_STORAGE_KEY = 'chess-analyser:play'
 export interface PlaySettings {
   orientation: Side
   autoFlip: boolean
+  /** Engine on: evaluation bar, grades and hints. Off stops analysis entirely. */
   showAnalysis: boolean
   showHint: boolean
 }
 
 interface Saved {
   version: 1
+  /** Identifies this game's saved review. A new game gets a new one. */
+  startedAt: number
   plies: ParsedPly[]
   /** Resignations and agreed draws. Rule endings are recomputed from the moves. */
   manualEnd: GameEnd | null
@@ -40,6 +43,7 @@ function restore(): Saved | null {
     }
     return {
       version: 1,
+      startedAt: typeof saved.startedAt === 'number' ? saved.startedAt : Date.now(),
       plies,
       manualEnd: plies.length === saved.plies.length ? saved.manualEnd ?? null : null,
       evaluations: Array.isArray(saved.evaluations) ? saved.evaluations.filter(e => typeof e?.fen === 'string' && Array.isArray(e.lines)) : [],
@@ -51,6 +55,7 @@ function restore(): Saved | null {
 /** One over-the-board game, kept in this browser between visits. */
 export function usePlayGame() {
   const [initial] = useState(restore)
+  const [startedAt, setStartedAt] = useState(() => initial?.startedAt ?? Date.now())
   const [plies, setPlies] = useState<ParsedPly[]>(initial?.plies ?? [])
   const [manualEnd, setManualEnd] = useState<GameEnd | null>(initial?.manualEnd ?? null)
   const [cursor, setCursor] = useState(plies.length)
@@ -91,6 +96,7 @@ export function usePlayGame() {
     setPlies([])
     setManualEnd(null)
     setCursor(0)
+    setStartedAt(Date.now())
     setJumped(true)
     if (settings.autoFlip) setSettings(s => ({ ...s, orientation: 'white' }))
   }, [settings.autoFlip])
@@ -114,6 +120,7 @@ export function usePlayGame() {
 
   return {
     initialEvaluations: initial?.evaluations ?? [],
+    id: `local-${startedAt}`, startedAt,
     plies, fens, fen, cursor, live, end, manualEnd, turn, settings, jumped,
     move, undo, newGame, playFromHere, goTo, resign, agreeDraw, updateSettings,
   }
@@ -123,17 +130,18 @@ export type PlayGame = ReturnType<typeof usePlayGame>
 
 /** Saves the game, its analysis and the board settings. Storage failures keep the game in memory. */
 export function usePlayPersistence(game: PlayGame, evaluations: ReadonlyMap<string, PositionEvaluation>) {
-  const { plies, manualEnd, settings, fens } = game
+  const { plies, manualEnd, settings, fens, startedAt } = game
   useEffect(() => {
     const saved: Saved = {
       version: 1,
+      startedAt,
       plies,
       manualEnd,
       settings,
       evaluations: fens.map(fen => evaluations.get(fen)).filter((e): e is PositionEvaluation => e !== undefined),
     }
     try { localStorage.setItem(PLAY_STORAGE_KEY, JSON.stringify(saved)) } catch { /* storage unavailable */ }
-  }, [plies, manualEnd, settings, fens, evaluations])
+  }, [plies, manualEnd, settings, fens, evaluations, startedAt])
 }
 
 /** Whether the side to move is in check in `fen`. */

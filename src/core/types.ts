@@ -20,6 +20,8 @@ export interface ImportedGame {
   rated: boolean
   opening: string | null
   eco: string | null
+  /** 'local' for games played on this app's board; absent for Chess.com imports. */
+  source?: 'local'
 }
 
 export interface ImportResult {
