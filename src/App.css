@@ -175,6 +175,7 @@
 .eval-bar__label[data-end="top"] { top: 4px; }
 .eval-bar__label.is-white { color: #22252a; }
 .eval-bar__label.is-black { color: #e8ebee; }
+.eval-bar.is-pending .eval-bar__label { opacity: .5; }
 
 .replay-controls { display: flex; align-items: center; gap: 12px; padding-left: 26px; }
 .replay-controls > .button-group { border-radius: 999px; overflow: hidden; border: 1px solid var(--rule-strong); }
