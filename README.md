@@ -32,6 +32,8 @@ The `predev` and `prebuild` scripts copy the pinned Stockfish JavaScript, WebAss
 
 The UI calls framework-independent services in [`src/core`](src/core/index.ts). Their contract is documented in [`docs/core-services.md`](docs/core-services.md). Interface decisions are recorded in [`docs/design.md`](docs/design.md).
 
+The library loads first. Review, Play, the board and the opening catalogue are separate chunks fetched on demand (and prefetched when the browser is idle); React and HeroUI sit in their own vendor chunks. [`src/heroui.css`](src/heroui.css) imports only the HeroUI component styles the app renders. Add a component's stylesheet there before using it; a browser test fails if a rendered HeroUI class has lost its rule.
+
 The app contacts only the public Chess.com API for imports:
 
 ```text
@@ -53,7 +55,6 @@ Analysis speed depends on the user's device. Each preset limits both search dept
 
 - Only completed standard chess is imported. Variants, live games, PGN upload and Lichess imports are outside this version's scope.
 - Local data belongs to this browser. There is no cross-device synchronisation. Clearing browser data removes saved reviews.
-- The production bundle currently includes the full HeroUI stylesheet and emits Vite's JavaScript chunk-size advisory. No code splitting has been added yet.
 
 ## Verification
 

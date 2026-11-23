@@ -1,16 +1,25 @@
-﻿import { useCallback, useState } from 'react'
+﻿import { Spinner } from '@heroui/react'
+import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
 import './App.css'
 import { GameLibrary } from './components/GameLibrary'
-import { GameWorkspace } from './components/GameWorkspace'
 import { Navigation } from './components/Navigation'
 import type { View } from './components/Navigation'
-import { PlayPage } from './components/PlayPage'
 import type { GameReview, ImportedGame, Side } from './core'
 import { useLibrary } from './hooks/useLibrary'
 import { PLAY_STORAGE_KEY } from './hooks/usePlayGame'
 import { useTheme } from './hooks/useTheme'
 
 const noop = () => {}
+
+// Review and Play load on demand, so the library opens without the board, engine glue and their UI.
+const loadWorkspace = () => import('./components/GameWorkspace')
+const loadPlay = () => import('./components/PlayPage')
+const GameWorkspace = lazy(() => loadWorkspace().then(module => ({ default: module.GameWorkspace })))
+const PlayPage = lazy(() => loadPlay().then(module => ({ default: module.PlayPage })))
+
+function ViewLoading() {
+  return <div className="view-loading"><Spinner size="lg" aria-label="Loading" /></div>
+}
 
 export default function App() {
   const library = useLibrary()
@@ -60,6 +69,16 @@ export default function App() {
     window.scrollTo({ top: 0 })
   }, [])
   const cached = selected ? reviews.get(selected.id) : null
+  // Fetch the other screens once the first one is idle, so switching later is instant.
+  useEffect(() => {
+    const warm = () => { loadWorkspace().catch(noop); loadPlay().catch(noop) }
+    if ('requestIdleCallback' in window) {
+      const id = requestIdleCallback(warm, { timeout: 4000 })
+      return () => cancelIdleCallback(id)
+    }
+    const id = setTimeout(warm, 2000)
+    return () => clearTimeout(id)
+  }, [])
   return (
     <div className="app" data-view={activeView}>
       <Navigation view={activeView} canReview={selected !== null} hasLocalData={state.username !== null || state.reviewedIds.size > 0} theme={theme} onTheme={setTheme} onNavigate={navigate} onClear={clearAll} />
@@ -69,10 +88,10 @@ export default function App() {
         </section>
         {selected && viewer && <section className="review-view" hidden={activeView !== 'board'} aria-label="Analysis workspace">
           {/* Keyed by PGN too: a local game reviewed again after more moves starts fresh. */}
-          <GameWorkspace key={`${selected.id}:${selected.pgn}`} game={selected} username={viewer} isActive={activeView === 'board'} cachedReview={cached?.pgn === selected.pgn ? cached : null} onReviewComplete={onReviewComplete} onReviewSaved={isLocal ? noop : library.markReviewed} onStorageIssue={library.flagStorage} onBack={() => navigate(isLocal ? 'play' : 'games')} backLabel={isLocal ? 'Play' : 'Games'} />
+          <Suspense fallback={<ViewLoading />}><GameWorkspace key={`${selected.id}:${selected.pgn}`} game={selected} username={viewer} isActive={activeView === 'board'} cachedReview={cached?.pgn === selected.pgn ? cached : null} onReviewComplete={onReviewComplete} onReviewSaved={isLocal ? noop : library.markReviewed} onStorageIssue={library.flagStorage} onBack={() => navigate(isLocal ? 'play' : 'games')} backLabel={isLocal ? 'Play' : 'Games'} /></Suspense>
         </section>}
         {playOpened && <section className="review-view play-view" hidden={activeView !== 'play'} aria-label="Play over the board">
-          <PlayPage key={playKey} isActive={activeView === 'play'} onReview={reviewLocal} />
+          <Suspense fallback={<ViewLoading />}><PlayPage key={playKey} isActive={activeView === 'play'} onReview={reviewLocal} /></Suspense>
         </section>}
       </main>
     </div>

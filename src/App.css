@@ -136,6 +136,7 @@
 
 /* ------------------------------------------------------------------ Review */
 .review-view { padding: 18px 22px 28px 30px; }
+.view-loading { display: grid; place-items: center; min-height: 60vh; }
 .workspace { display: grid; grid-template-columns: minmax(0,1fr) 380px; gap: 30px; align-items: start; max-width: 1720px; margin: 0 auto; --board-col: min(100%, calc(100dvh - 190px), 960px); }
 .workspace--message { grid-template-columns: minmax(0,1fr); }
 .workspace__board { display: grid; gap: 10px; justify-items: center; min-width: 0; padding-top: 6px; }

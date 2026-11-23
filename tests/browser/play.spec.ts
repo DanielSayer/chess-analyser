@@ -182,7 +182,10 @@ test('explored lines in the review promote to the chosen piece', async ({ page }
   await openPlay(page)
   await page.getByRole('button', { name: 'Review game' }).click()
   const reviewBoard = page.getByTestId('board')
+  // The review screen loads on demand; wait for it before using its shortcuts.
+  await expect(reviewBoard).toBeVisible()
   await page.keyboard.press('End')
+  await expect(page.getByLabel('Analysis workspace').locator('.replay-controls__position')).toHaveText('4… Nc6')
   await reviewBoard.locator('[data-square="b7"] [data-piece]').click()
   await reviewBoard.locator('[data-square="a8"]').click()
   const picker = page.getByRole('dialog', { name: 'Choose a promotion piece' })
