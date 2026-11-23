@@ -1,5 +1,4 @@
-﻿@import "tailwindcss";
-@import "@heroui/styles";
+﻿@import "./heroui.css";
 
 /* Light (default). */
 :root, html[data-theme="light"] {
