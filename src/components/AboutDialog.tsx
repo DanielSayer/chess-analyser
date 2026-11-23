@@ -79,7 +79,7 @@ export function AboutDialog({ hasLocalData, onClear }: Props) {
                     <p>Remove saved games, reviews and the remembered username from this browser.</p>
                     <AlertDialog>
                       <Button size="sm" variant="danger-soft" isDisabled={!hasLocalData}>Clear local data</Button>
-                      <AlertDialog.Backdrop>
+                      <AlertDialog.Backdrop isKeyboardDismissDisabled={false}>
                         <AlertDialog.Container size="sm">
                           <AlertDialog.Dialog>
                             {({ close }) => (

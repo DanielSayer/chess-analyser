@@ -256,7 +256,7 @@ function GameActions({ game, onReview }: { game: PlayGame; onReview: () => void 
         />
         <AlertDialog>
           <Button variant="secondary" isDisabled={end !== null || !plies.length}><Flag size={16} /> Resign</Button>
-          <AlertDialog.Backdrop>
+          <AlertDialog.Backdrop isKeyboardDismissDisabled={false}>
             <AlertDialog.Container size="sm">
               <AlertDialog.Dialog>
                 {({ close }) => (
@@ -325,7 +325,7 @@ function Confirm({ trigger, variant, skip, isDisabled, heading, body, confirm, o
   return (
     <AlertDialog>
       <Button variant={variant} isDisabled={isDisabled}>{trigger}</Button>
-      <AlertDialog.Backdrop>
+      <AlertDialog.Backdrop isKeyboardDismissDisabled={false}>
         <AlertDialog.Container size="sm">
           <AlertDialog.Dialog>
             {({ close }) => (

@@ -48,7 +48,7 @@ test('trimmed HeroUI stylesheet covers every rendered component', async ({ page 
   await playBoard.locator('[data-square="e2"] [data-piece]').click()
   await playBoard.locator('[data-square="e4"]').click()
   await grab()
-  await popup('alertdialog', () => page.getByRole('button', { name: 'Resign' }).click(), () => page.getByRole('button', { name: 'Cancel' }).click())
+  await popup('alertdialog', () => page.getByRole('button', { name: 'Resign' }).click())
 
   const ruleClasses = (css: string) => new Set([...css.matchAll(/\.((?:[a-zA-Z0-9_-]|\\.)+)/g)].map(m => m[1].replace(/\\/g, '')))
   const full = ruleClasses(readFileSync('node_modules/@heroui/styles/dist/heroui.min.css', 'utf8'))

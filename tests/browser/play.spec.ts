@@ -152,6 +152,12 @@ test("ends on checkmate, then resignation and agreed draws can be taken back", a
 
   await page.getByRole('button', { name: 'Undo' }).click()
   await expect(board(page).locator('[data-check]')).toHaveCount(0)
+  // Escape cancels the confirmation.
+  await page.getByRole('button', { name: 'Resign' }).click()
+  await expect(page.getByRole('alertdialog', { name: 'Who resigns?' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(page.getByRole('alertdialog')).toHaveCount(0)
+  await expect(page.getByRole('status').filter({ hasText: 'Black to move' })).toBeVisible()
   await page.getByRole('button', { name: 'Resign' }).click()
   await page.getByRole('button', { name: 'Black resigns' }).click()
   await expect(page.getByRole('status').filter({ hasText: 'White wins by resignation' })).toBeVisible()
