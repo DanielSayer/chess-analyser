@@ -78,11 +78,11 @@ export function useReplay(parsed: ParsedGame) {
   }, [variation])
 
   /** Plays a legal move from the shown position. Returns false for an illegal move. */
-  const playMove = useCallback((from: string, to: string): boolean => {
+  const playMove = useCallback((from: string, to: string, promotion: 'q' | 'r' | 'b' | 'n' = 'q'): boolean => {
     const chess = new Chess(fen)
     let move
     try {
-      move = chess.move({ from, to, promotion: 'q' })
+      move = chess.move({ from, to, promotion })
     } catch {
       return false
     }

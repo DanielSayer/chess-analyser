@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AnalysisPreset, GameReview, ImportedGame, ParsedGame, Side } from '../core'
-import { PRESETS, lineToSan, parseGame, sideForUsername } from '../core'
+import { PRESETS, isPromotion, lineToSan, parseGame, sideForUsername } from '../core'
 import { useGameReview } from '../hooks/useGameReview'
 import type { ReviewRun } from '../hooks/useGameReview'
 import { usePositionLines } from '../hooks/usePositionLines'
@@ -16,6 +16,7 @@ import { EvalBar } from './EvalBar'
 import { EvalGraph } from './EvalGraph'
 import { GradeBadge } from './GradeBadge'
 import { MoveList } from './MoveList'
+import { PromotionPicker } from './PromotionPicker'
 import { ReviewFlight } from './ReviewFlight'
 import type { Landing } from './ReviewFlight'
 import { ReviewSummary } from './ReviewSummary'
@@ -147,13 +148,21 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
 
   const lines = usePositionLines(variation ? replay.fen : null, isActive && variation !== null && !running)
 
+  // A promotion waits for a piece choice; it lapses if the shown position changes.
+  const [promotion, setPromotion] = useState<{ fen: string; from: string; to: string } | null>(null)
+  const pendingPromotion = promotion?.fen === replay.fen ? promotion : null
+  const onMove = (from: string, to: string) => {
+    if (isPromotion(replay.fen, from, to)) { setPromotion({ fen: replay.fen, from, to }); return false }
+    return replay.playMove(from, to)
+  }
+
   useReplayKeys({
     prev: () => replay.step(-1),
     next: () => replay.step(1),
     start: replay.toStart,
     end: replay.toEnd,
     flip: () => setFlipped(f => !f),
-    escape: replay.exitVariation,
+    escape: () => { if (pendingPromotion) setPromotion(null); else replay.exitVariation() },
   }, isActive)
 
   const evaluation = variation
@@ -194,8 +203,16 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
                 moveGrade={!variation && index > 0 ? review?.moves[index - 1]?.grade ?? null : null}
                 arrows={arrows}
                 animate={!replay.jumped}
-                onMove={replay.playMove}
+                interactive={!pendingPromotion}
+                onMove={onMove}
               />
+              {pendingPromotion && (
+                <PromotionPicker
+                  side={pendingPromotion.fen.split(' ')[1] === 'w' ? 'white' : 'black'}
+                  onPick={piece => { setPromotion(null); replay.playMove(pendingPromotion.from, pendingPromotion.to, piece) }}
+                  onCancel={() => setPromotion(null)}
+                />
+              )}
             </div>
           </div>
           {strip(top === 'white' ? 'black' : 'white')}

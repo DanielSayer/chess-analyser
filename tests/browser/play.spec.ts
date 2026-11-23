@@ -177,6 +177,28 @@ test('promotes to the chosen piece', async ({ page }) => {
   await expect(page.locator('.replay-controls__position')).toHaveText('5. bxa8=N')
 })
 
+test('explored lines in the review promote to the chosen piece', async ({ page }) => {
+  await seed(page, ['a2a4', 'b7b5', 'a4b5', 'a7a6', 'b5a6', 'c8b7', 'a6b7', 'b8c6'])
+  await openPlay(page)
+  await page.getByRole('button', { name: 'Review game' }).click()
+  const reviewBoard = page.getByTestId('board')
+  await page.keyboard.press('End')
+  await reviewBoard.locator('[data-square="b7"] [data-piece]').click()
+  await reviewBoard.locator('[data-square="a8"]').click()
+  const picker = page.getByRole('dialog', { name: 'Choose a promotion piece' })
+  await expect(picker).toBeVisible()
+  // Escape closes the picker first and leaves the board unchanged.
+  await page.keyboard.press('Escape')
+  await expect(picker).toHaveCount(0)
+  await expect(reviewBoard.locator('[data-square="b7"] [data-piece="wP"]')).toBeVisible()
+
+  await reviewBoard.locator('[data-square="b7"] [data-piece]').click()
+  await reviewBoard.locator('[data-square="a8"]').click()
+  await picker.getByRole('button', { name: 'Rook' }).click()
+  await expect(reviewBoard.locator('[data-square="a8"] [data-piece="wR"]')).toBeVisible()
+  await expect(page.getByLabel('Explored line')).toContainText('bxa8=R')
+})
+
 for (const viewport of [{ name: 'desktop', width: 1440, height: 900 }, { name: 'tablet', width: 1024, height: 900 }, { name: 'mobile', width: 390, height: 844 }]) {
   test(`play page fits ${viewport.name} without horizontal overflow`, async ({ page }) => {
     await page.setViewportSize(viewport)

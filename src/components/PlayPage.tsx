@@ -4,8 +4,7 @@ import {
 } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
-import { defaultPieces } from 'react-chessboard'
-import type { GradedMove, ImportedGame, MoveInput, OpeningBook, PositionEvaluation, Side } from '../core'
+import type { GradedMove, ImportedGame, OpeningBook, PositionEvaluation, Side } from '../core'
 import { START_FEN, endText, gradeGame, isPromotion, loadOpeningBook, material, toLocalGame, toPgn } from '../core'
 import { useLiveEvaluations } from '../hooks/useLiveEvaluations'
 import { inCheck, usePlayGame, usePlayPersistence } from '../hooks/usePlayGame'
@@ -16,12 +15,11 @@ import type { BoardArrow } from './AnalysisBoard'
 import { EvalBar } from './EvalBar'
 import { GradeBadge } from './GradeBadge'
 import { MoveList } from './MoveList'
+import { PromotionPicker } from './PromotionPicker'
 import { GRADES, formatEval, moveNumber, numberedLine } from '../ui/format'
 
 const BEST_ARROW = 'rgba(224, 80, 31, 0.82)'
 const PIECE_GLYPH: Record<string, string> = { q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
-const PROMOTIONS: NonNullable<MoveInput['promotion']>[] = ['q', 'r', 'b', 'n']
-const PIECE_NAME = { q: 'Queen', r: 'Rook', b: 'Bishop', n: 'Knight' }
 const other = (side: Side): Side => (side === 'white' ? 'black' : 'white')
 const capital = (side: Side) => (side === 'white' ? 'White' : 'Black')
 
@@ -170,24 +168,6 @@ function PlayerStrip({ side, fen, toMove, end }: { side: Side; fen: string; toMo
       </span>
       {toMove && <span className="player-strip__clock">To move</span>}
       {score && <span className="player-strip__clock player-strip__score tabular">{score}</span>}
-    </div>
-  )
-}
-
-function PromotionPicker({ side, onPick, onCancel }: { side: Side; onPick: (piece: NonNullable<MoveInput['promotion']>) => void; onCancel: () => void }) {
-  return (
-    <div className="promotion" role="dialog" aria-label="Choose a promotion piece">
-      <div className="promotion__card">
-        <p className="promotion__title">Promote to</p>
-        <div className="promotion__options">
-          {PROMOTIONS.map(piece => (
-            <button key={piece} type="button" className="promotion__option" aria-label={PIECE_NAME[piece]} onClick={() => onPick(piece)}>
-              {defaultPieces[`${side[0]}${piece.toUpperCase()}`]()}
-            </button>
-          ))}
-        </div>
-        <Button size="sm" variant="tertiary" onPress={onCancel}>Cancel</Button>
-      </div>
     </div>
   )
 }

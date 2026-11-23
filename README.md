@@ -22,7 +22,7 @@ The `predev` and `prebuild` scripts copy the pinned Stockfish JavaScript, WebAss
 - Search by opponent or opening, and filter by result or speed.
 - Replay with move navigation, keyboard shortcuts, board flipping and recorded clocks where provided.
 - Full-game review with per-move grades, accuracy for both players, best continuations, an evaluation graph and critical moments.
-- Legal move exploration with up to three local engine lines and a return to the played game.
+- Legal move exploration with a promotion-piece choice, up to three local engine lines and a return to the played game.
 - Progress, cancellation, retries and completed-review preservation after failed or cancelled reruns.
 - Local persistence, an in-memory fallback when browser storage is unavailable, and an explicit clear-data action.
 - A **Play** page for two players on one device: legal-move hints, promotion choice, board flipping (manual or after every move), an evaluation bar, live move grades, a graded scoresheet with history navigation, undo, resign, agreed draws, PGN copy and automatic saving in this browser. An engine button switches analysis off entirely to avoid spoilers. **Review game** opens the played game, finished or not, in the full review. No matchmaking and no network requests.
@@ -52,7 +52,6 @@ Grades add a second, centipawn measure because winning chances saturate: at +10 
 Analysis speed depends on the user's device. Each preset limits both search depth and time per position, so the achieved depth can be lower than the selected target. The lite engine uses a smaller network than full Stockfish. Results can change with search settings.
 
 - Only completed standard chess is imported. Variants, live games, PGN upload and Lichess imports are outside this version's scope.
-- Explored pawn promotions currently choose a queen automatically.
 - Local data belongs to this browser. There is no cross-device synchronisation. Clearing browser data removes saved reviews.
 - The production bundle currently includes the full HeroUI stylesheet and emits Vite's JavaScript chunk-size advisory. No code splitting has been added yet.
 
