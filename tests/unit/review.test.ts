@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { parseGame, lineToSan } from '../../src/core/game'
-import { accuracyForLoss, buildReview, gradeMove, winningChance } from '../../src/core/review'
+import { accuracyForLoss, gradeMove, winningChance } from '../../src/core/grading'
+import { buildReview } from '../../src/core/review'
 import { isBookPosition, loadOpeningBook } from '../../src/core/book'
 import { isReviewForGame } from '../../src/core/storage'
 import type { PositionEvaluation } from '../../src/core/types'
@@ -52,6 +53,15 @@ describe('game review', () => {
     expect(review.moves.map(move => move.grade)).toEqual(['book', 'book', 'book', 'book', 'inaccuracy', 'excellent'])
     expect(review.moves[1]).toMatchObject({ accuracy: 100, winningChanceLoss: 0 })
     expect(review.white.counts.book).toBe(2)
+  })
+
+  it('grades like the Play page, so giving away part of a decided advantage is not Excellent', () => {
+    // 2. Nf3 drops +11 to +8: only ~3% winning chance (Good), but 300 cp (Inaccuracy on widened bands).
+    const { game, positions } = evaluate('1. e4 e5 2. Nf3', [1100, 1100, 1100, 800])
+    const review = buildReview(game, positions, 'quick')
+    expect(review.moves[2]).toMatchObject({ grade: 'inaccuracy', centipawnLoss: 300 })
+    expect(review.moves[2].winningChanceLoss).toBeLessThan(5)
+    expect(review.criticalPlies).toEqual([3])
   })
 
   it("still grades a costly book move, so named traps like Fool's Mate are blunders", async () => {

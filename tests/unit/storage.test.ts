@@ -36,7 +36,7 @@ describe('local persistence', () => {
     }))), version: 1 as const, createdAt: '2026-01-01T00:00:00.000Z' }
     await saveReview(legacy)
     const restored = await loadReview(TEST_GAME)
-    expect(restored).toMatchObject({ version: 2, createdAt: legacy.createdAt, positions: legacy.positions })
+    expect(restored).toMatchObject({ version: 3, createdAt: legacy.createdAt, positions: legacy.positions })
     expect(restored?.moves[0].grade).toBe('book')
   })
 })

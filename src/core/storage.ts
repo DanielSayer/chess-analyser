@@ -46,7 +46,7 @@ export async function saveReview(review: GameReview): Promise<void> {
 }
 
 export function isReviewForGame(review: GameReview, game: ImportedGame): boolean {
-  return (review.version === 1 || review.version === REVIEW_VERSION) && review.engine === ENGINE_NAME && review.gameId === game.id && review.pgn === game.pgn &&
+  return [1, 2, REVIEW_VERSION].includes(review.version) && review.engine === ENGINE_NAME && review.gameId === game.id && review.pgn === game.pgn &&
     Array.isArray(review.moves) && review.moves.length > 0 && Array.isArray(review.positions) && review.positions.length === review.moves.length + 1
 }
 

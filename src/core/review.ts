@@ -1,35 +1,11 @@
-import { isBookPosition, loadOpeningBook } from './book'
+import { loadOpeningBook } from './book'
 import type { OpeningBook } from './book'
 import { ENGINE_NAME, StockfishEngine } from './engine'
-import { lineToSan, parseGame, uciToSan } from './game'
+import { parseGame } from './game'
+import { accuracyForLoss, gradeGame } from './grading'
 import type { AnalyseOptions, GameReview, ImportedGame, MoveGrade, PositionEvaluation, ReviewedMove, SideSummary } from './types'
 
-// Published Lichess move-accuracy equations. Game accuracy below is our simple
-// average, NOT Chess.com's proprietary metric or Lichess's weighted game score.
-// https://lichess.org/page/accuracy
-export function winningChance(centipawns: number): number {
-  return 100 / (1 + Math.exp(-0.00368208 * centipawns))
-}
-
-export function accuracyForLoss(loss: number): number {
-  if (loss <= 0) return 100
-  return Math.max(0, Math.min(100, 103.1668 * Math.exp(-0.04354 * loss) - 3.1669))
-}
-
-// Bands follow Chess.com's published expected-points table (0.02 / 0.05 /
-// 0.10 / 0.20), on our 0-100 winning-chance scale.
-// https://support.chess.com/en/articles/8572705
-export const GRADE_THRESHOLDS = { excellent: 2, good: 5, inaccuracy: 10, mistake: 20 } as const
-
-export function gradeMove(loss: number, isBest: boolean, forced = false): MoveGrade {
-  if (forced) return 'forced'
-  if (isBest) return 'best'
-  if (loss < GRADE_THRESHOLDS.excellent) return 'excellent'
-  if (loss < GRADE_THRESHOLDS.good) return 'good'
-  if (loss < GRADE_THRESHOLDS.inaccuracy) return 'inaccuracy'
-  if (loss < GRADE_THRESHOLDS.mistake) return 'mistake'
-  return 'blunder'
-}
+const CRITICAL: MoveGrade[] = ['inaccuracy', 'mistake', 'blunder']
 
 export function summarise(moves: ReviewedMove[]): SideSummary {
   const counts: SideSummary['counts'] = { book: 0, best: 0, excellent: 0, good: 0, inaccuracy: 0, mistake: 0, blunder: 0, forced: 0 }
@@ -43,7 +19,7 @@ export function summarise(moves: ReviewedMove[]): SideSummary {
 }
 
 /** Bump when grading changes. Older reviews are regraded from their stored positions. */
-export const REVIEW_VERSION = 2
+export const REVIEW_VERSION = 3
 
 /** Book-graded review. The book is optional; analysis never fails because of it. */
 export async function buildGradedReview(game: ImportedGame, positions: PositionEvaluation[], preset: GameReview['preset'] = 'standard'): Promise<GameReview> {
@@ -61,32 +37,12 @@ export function buildReview(
   if (positions.length !== parsed.plies.length + 1 || positions[0].fen !== parsed.initialFen || parsed.plies.some((ply, index) => positions[index + 1].fen !== ply.after)) {
     throw new Error('Analysis positions do not match this game.')
   }
-  let inBook = true
+  const evaluations = new Map(positions.map(position => [position.fen, position]))
+  // Same grading as the Play page: worse of winning-chance and centipawn bands.
+  const grades = gradeGame(parsed.plies, evaluations, book)
   const moves = parsed.plies.map((ply, index): ReviewedMove => {
-    const before = positions[index]
-    const after = positions[index + 1]
-    const sign = ply.side === 'white' ? 1 : -1
-    const rawLoss = Math.max(0, (winningChance(before.centipawns) - winningChance(after.centipawns)) * sign)
-    // Named theory is not judged, like Chess.com's "Book" moves. The catalogue
-    // also names traps (e.g. Fool's Mate), so a book move that costs a mistake
-    // or worse is still graded and ends the book run.
-    inBook &&= isBookPosition(book, ply.after) && rawLoss < GRADE_THRESHOLDS.inaccuracy
-    const isBook = inBook
-    const isBest = ply.uci === before.bestMove
-    // Independent bounded searches can disagree slightly. An engine's own top
-    // move must never be called a mistake because of that search noise.
-    const unjudged = isBest || isBook
-    const winningChanceLoss = unjudged ? 0 : rawLoss
-    return {
-      ...ply,
-      grade: isBook ? 'book' : gradeMove(winningChanceLoss, isBest, ply.legalMoves === 1),
-      centipawnLoss: unjudged ? 0 : Math.min(1000, Math.max(0, (before.centipawns - after.centipawns) * sign)),
-      winningChanceLoss,
-      accuracy: accuracyForLoss(winningChanceLoss),
-      bestMove: before.bestMove,
-      bestSan: before.bestMove ? uciToSan(ply.before, before.bestMove) : null,
-      bestLine: lineToSan(ply.before, before.moves),
-    }
+    const graded = grades[index]!
+    return { ...ply, ...graded, accuracy: accuracyForLoss(graded.winningChanceLoss) }
   })
   return {
     version: REVIEW_VERSION,
@@ -100,7 +56,10 @@ export function buildReview(
     positions,
     white: summarise(moves.filter(move => move.side === 'white')),
     black: summarise(moves.filter(move => move.side === 'black')),
-    criticalPlies: moves.filter(move => ['inaccuracy', 'mistake', 'blunder'].includes(move.grade)).sort((a, b) => b.winningChanceLoss - a.winningChanceLoss).slice(0, 5).map(move => move.ply),
+    // Worst grade first; a centipawn-band mistake can lose little winning chance.
+    criticalPlies: moves.filter(move => CRITICAL.includes(move.grade))
+      .sort((a, b) => CRITICAL.indexOf(b.grade) - CRITICAL.indexOf(a.grade) || b.winningChanceLoss - a.winningChanceLoss || b.centipawnLoss - a.centipawnLoss)
+      .slice(0, 5).map(move => move.ply),
     opening: game.opening ?? parsed.headers.Opening ?? null,
     eco: game.eco ?? parsed.headers.ECO ?? null,
   }

@@ -1,10 +1,6 @@
 import { Chess } from 'chess.js'
 import type { Square } from 'chess.js'
-import { isBookPosition } from './book'
-import type { OpeningBook } from './book'
-import { lineToSan, uciToSan } from './game'
-import { GRADE_THRESHOLDS, gradeMove, winningChance } from './review'
-import type { EngineLine, ImportedGame, MoveGrade, ParsedPly, PositionEvaluation, Side } from './types'
+import type { ImportedGame, ParsedPly, Side } from './types'
 
 export const START_FEN = new Chess().fen()
 
@@ -151,94 +147,4 @@ export function material(fen: string): Record<Side, Material> {
     white: { captured: taken('b'), lead: diff },
     black: { captured: taken('w'), lead: -diff },
   }
-}
-
-/* ------------------------------------------------------------------ Grading */
-
-/*
- * Winning-chance bands alone saturate: once one side is far ahead, nearly
- * every move keeps ~100% and grades as Excellent. A second, centipawn band
- * keeps judging how much of the advantage a move gives away. Its tolerance
- * widens as the position gets more decided, so dropping a pawn at +8 is
- * criticised less than at +1, but no longer passes as Excellent. A move gets
- * the worse of the two grades.
- */
-
-/** Scores beyond 12 pawns, including forced mates, all count as decisive. */
-export const DECISIVE_CENTIPAWNS = 1200
-/** Centipawn loss bands, before widening. Looser than the winning-chance bands near equality. */
-export const CENTIPAWN_BANDS = { excellent: 30, good: 70, inaccuracy: 150, mistake: 300 } as const
-/** Every this many centipawns of advantage widens the bands by one more multiple. */
-export const DECIDED_WIDTH = 600
-
-const SEVERITY: MoveGrade[] = ['best', 'excellent', 'good', 'inaccuracy', 'mistake', 'blunder']
-
-function moverScore(line: Pick<EngineLine, 'centipawns' | 'mate'>, side: Side): number {
-  const white = line.mate !== null ? Math.sign(line.mate) * DECISIVE_CENTIPAWNS : Math.max(-DECISIVE_CENTIPAWNS, Math.min(DECISIVE_CENTIPAWNS, line.centipawns))
-  return side === 'white' ? white : -white
-}
-
-/** Grade for giving up `loss` centipawns when the best move keeps `best` (mover's view, capped). */
-export function centipawnGrade(best: number, loss: number): MoveGrade {
-  const scaled = Math.max(0, loss) / (1 + Math.abs(best) / DECIDED_WIDTH)
-  if (scaled < CENTIPAWN_BANDS.excellent) return 'excellent'
-  if (scaled < CENTIPAWN_BANDS.good) return 'good'
-  if (scaled < CENTIPAWN_BANDS.inaccuracy) return 'inaccuracy'
-  if (scaled < CENTIPAWN_BANDS.mistake) return 'mistake'
-  return 'blunder'
-}
-
-export interface GradedMove {
-  grade: MoveGrade
-  /** Mover's centipawn loss against the best move, capped at decisive scores. */
-  centipawnLoss: number
-  winningChanceLoss: number
-  bestMove: string | null
-  bestSan: string | null
-  bestLine: string[]
-}
-
-/**
- * Grades one move from evaluations of the positions before and after it.
- * When the played move is among the earlier search's lines, that line's score
- * is used, so both moves are compared by one search instead of two.
- */
-export function gradePlayedMove(ply: ParsedPly, before: PositionEvaluation, after: PositionEvaluation, inBook = false): GradedMove {
-  const sameSearch = before.lines.find(line => line.moves[0] === ply.uci)
-  const played = sameSearch ?? after
-  const best = moverScore(before, ply.side)
-  const centipawnLoss = Math.max(0, best - moverScore(played, ply.side))
-  const sign = ply.side === 'white' ? 1 : -1
-  const winningChanceLoss = Math.max(0, (winningChance(before.centipawns) - winningChance(played.centipawns)) * sign)
-  const isBest = ply.uci === before.bestMove || (sameSearch !== undefined && centipawnLoss === 0)
-  const base = {
-    bestMove: before.bestMove,
-    bestSan: before.bestMove ? uciToSan(ply.before, before.bestMove) : null,
-    bestLine: lineToSan(ply.before, before.moves),
-  }
-  if (inBook) return { ...base, grade: 'book', centipawnLoss: 0, winningChanceLoss: 0 }
-  if (ply.legalMoves === 1) return { ...base, grade: 'forced', centipawnLoss: 0, winningChanceLoss: 0 }
-  if (isBest) return { ...base, grade: 'best', centipawnLoss: 0, winningChanceLoss: 0 }
-  const byChance = gradeMove(winningChanceLoss, false)
-  const byCentipawns = centipawnGrade(best, centipawnLoss)
-  const grade = SEVERITY.indexOf(byChance) >= SEVERITY.indexOf(byCentipawns) ? byChance : byCentipawns
-  return { ...base, grade, centipawnLoss, winningChanceLoss }
-}
-
-/**
- * Grades every ply whose surrounding positions have been evaluated.
- * Opening theory stays Book until a move leaves the catalogue or costs an
- * inaccuracy or worse (catalogued traps).
- */
-export function gradeGame(plies: ParsedPly[], evaluations: ReadonlyMap<string, PositionEvaluation>, book?: OpeningBook): (GradedMove | null)[] {
-  let inBook = book !== undefined
-  return plies.map(ply => {
-    const before = evaluations.get(ply.before)
-    const after = evaluations.get(ply.after)
-    const sign = ply.side === 'white' ? 1 : -1
-    // Unevaluated moves keep the book run alive until their scores arrive.
-    const rawLoss = before && after ? Math.max(0, (winningChance(before.centipawns) - winningChance(after.centipawns)) * sign) : 0
-    inBook &&= isBookPosition(book!, ply.after) && rawLoss < GRADE_THRESHOLDS.inaccuracy
-    return before && after ? gradePlayedMove(ply, before, after, inBook) : null
-  })
 }

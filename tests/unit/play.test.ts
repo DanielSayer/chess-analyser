@@ -2,10 +2,8 @@ import { Chess } from 'chess.js'
 import { describe, expect, it } from 'vitest'
 import { loadOpeningBook } from '../../src/core/book'
 import { parseGame } from '../../src/core/game'
-import {
-  START_FEN, centipawnGrade, endText, gradeGame, gradePlayedMove, isPromotion, material, playMove, ruleEnding, toLocalGame, toPgn,
-} from '../../src/core/play'
-import { gradeMove, winningChance } from '../../src/core/review'
+import { centipawnGrade, gradeGame, gradeMove, gradePlayedMove, winningChance } from '../../src/core/grading'
+import { START_FEN, endText, isPromotion, material, playMove, ruleEnding, toLocalGame, toPgn } from '../../src/core/play'
 import type { EngineLine, ParsedPly, PositionEvaluation } from '../../src/core/types'
 import { endingText, scoreline } from '../../src/ui/format'
 

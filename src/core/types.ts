@@ -80,8 +80,8 @@ export interface SideSummary {
 }
 
 export interface GameReview {
-  /** 1: pre-book grading. 2: book moves and Chess.com expected-points bands. */
-  version: 1 | 2
+  /** 1: pre-book grading. 2: book moves and Chess.com expected-points bands. 3: Play page grading (adds centipawn bands). */
+  version: 1 | 2 | 3
   engine: string
   gameId: string
   /** Binds cached results to exact immutable game input. */
