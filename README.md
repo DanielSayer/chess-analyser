@@ -24,8 +24,9 @@ The `predev` and `prebuild` scripts copy the pinned Stockfish JavaScript, WebAss
 - Full-game review with per-move grades, accuracy for both players, best continuations, an evaluation graph and critical moments.
 - Legal move exploration with a promotion-piece choice, up to three local engine lines and a return to the played game.
 - Progress, cancellation, retries and completed-review preservation after failed or cancelled reruns.
-- Local persistence, an in-memory fallback when browser storage is unavailable, and an explicit clear-data action.
+- Local persistence (games, reviews and practice progress), an in-memory fallback when browser storage is unavailable, and an explicit clear-data action.
 - A **Play** page for two players on one device: legal-move hints, promotion choice, board flipping (manual or after every move), an evaluation bar, live move grades, a graded scoresheet with history navigation, undo, resign, agreed draws, PGN copy and automatic saving in this browser. An engine button switches analysis off entirely to avoid spoilers. **Review game** opens the played game, finished or not, in the full review. No matchmaking and no network requests.
+- A **Practise** page that turns your Mistakes and Blunders from reviewed games into "find a better move" positions (both sides for games reviewed from Play). The engine's move or any answer graded Good or better counts; a forced mate must be kept. Hint, solution, retry, a link back to the review, and progress saved in this browser. Positions never tried come first, then ones you missed, then solved ones. Each mistake in a review has a **Practise** button.
 - Responsive desktop and mobile layouts, with an About dialog for shortcuts, scoring and engine licences.
 
 ## Architecture and data

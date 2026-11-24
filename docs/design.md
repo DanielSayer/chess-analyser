@@ -4,12 +4,13 @@ Layout updated 11 November 2026 from the user's Chessigma screenshots; visual id
 
 ## Layout
 
-- The navigation rail is a numbered contents list (01 Your games, 02 Game review, 03 Play) with the theme switch and About at the foot. It is 228px wide on large screens, 204px at smaller desktop widths, and collapses to icons below 1150px.
+- The navigation rail is a numbered contents list (01 Your games, 02 Game review, 03 Play, 04 Practise) with the theme switch and About at the foot. It is 228px wide on large screens, 204px at smaller desktop widths, and collapses to icons below 1150px.
 - The library is a centred column, up to 760px wide, under a ruled masthead. It contains the player line with a W/L/½ form guide, three pill actions and a ledger of games grouped by day. Import and filters expand in place. There is no decorative empty chessboard.
 - Games show a W/L/½ result tile, opponent, rating, opening, colour, time control and move count. The Review action opens the review. Day headings sit on a rule and a +/−/= record.
 - The review uses a large board on the left and a report on the right. The report contains its evaluation graph, Summary and Moves tabs, player comparison, critical moments and review controls. No game-list sidebar competes with the board.
 - Board size follows the available width and viewport height. The report is 370px wide, narrowing to 330px and 310px on smaller desktops. Below 980px it sits underneath the board.
 - Play (added 20 November 2026) reuses the review layout: board, evaluation bar and player strips on the left, an "Over the board" panel on the right with the selected-move note, a graded scoresheet that fills the remaining height, and game actions and switches at the foot. The board header shows whose move it is or the result. Player strips show captured pieces, material lead and a lit "To move" pill.
+- Practise (added 24 November 2026) reuses the same layout without an evaluation bar, so nothing gives the answer away. The panel shows progress tiles (positions, new, to retry, solved, plus this session's score), the game move as a margin note with its grade, an answer note that turns green, claret or red pen, and Hint / Show solution / Skip, or Next / Try again / Open in review once done. A hint rings the piece to move. The empty state links to Your games.
 - Below 700px navigation becomes a compact top bar. Library rows, import controls and the board fit a narrow screen without horizontal scrolling.
 
 ## Visual language
@@ -32,6 +33,7 @@ The concept is an annotated scoresheet with a red pen, on neutral grey and white
 - Finishing or loading a review scrolls its report to the top so the new results are visible.
 - Trying a move starts an explored line. Changing that position cancels the old position search. Exploration pauses while a full game review runs or the review screen is hidden.
 - Play mounts on first visit and stays mounted, so its game and engine survive switching pages. `#play` opens it directly. The game, its evaluations and board settings are saved in localStorage after every change; clearing local data resets it. One engine evaluates positions in turn (current position first) and never restarts mid-search. Viewing earlier moves is read-only until "Back to game" or "Play from here". Resignations and agreed draws can be taken back with Undo. The engine button (also the "Engine analysis" switch) stops the worker, hides the bar, grades and hint, and catches up when switched back on. Review game wraps the game as a local `ImportedGame` (`source: 'local'`, no Chess.com link) and opens it in the review workspace; its back action returns to Play.
+- Practise mounts on first visit and stays mounted; `#practise` opens it directly. It reloads saved reviews each time it becomes active, merged with this session's reviews, so a game reviewed a moment ago appears. Imported games give only the current player's moves; games reviewed from Play give both sides. The first decisive answer is recorded: solved only if right first time without a hint. Skipping records nothing. Answers other than the engine's move or the game move are checked by one Stockfish worker (Standard). Open in review jumps the review to the mistake; the review's Practise button opens that position, fresh.
 - Changing the player resets game filters. Browser-storage failures still fall back to the session's in-memory reviews.
 
 ## Verification

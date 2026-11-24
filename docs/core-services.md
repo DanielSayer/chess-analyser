@@ -28,10 +28,17 @@ Import from `src/core/index.ts`. The core has no React dependency. All request a
 - `saveReview(review)` writes a completed review. Do not save partial analysis.
 - `loadReview(game)` returns only a compatible review for the exact game ID, PGN and engine, or null.
 - `loadReviewedIds()` helps mark saved games. A review must still be loaded with `loadReview` before use.
-- `clearLocalData()` removes saved games, reviews and remembered username. Only invoke this via an explicit user action.
+- `loadAllReviews()` returns every compatible saved review, regraded where needed. `loadPracticeRecords()` and `savePracticeRecord(record)` keep practice progress in the IndexedDB `practice` store (database version 2; version 1 data is kept on upgrade).
+- `clearLocalData()` removes saved games, reviews, practice progress and remembered username. Only invoke this via an explicit user action.
 - Use AbortController plus request/run identity checks. When changing username, game or starting a new run, cancel superseded work. Late import, storage reads, position analysis and progress callbacks must not update the newly selected game/player.
 - Cancelling a rerun must retain an earlier completed review. The page must remain usable after failure or cancellation.
 - Browser storage can be unavailable. Keep the app usable in memory and show a concise persistence notice if needed.
+
+## Practice
+
+- `collectPuzzles(reviews, username)` turns Mistakes and Blunders into `Puzzle`s with id `${gameId}:${ply}`. Imported games give only `username`'s moves (matched on the PGN White/Black headers); games with a `local-` id give both sides. Positions without a best move are skipped.
+- `judgeAttempt(puzzle, ply, after?)` returns `correct` for the engine's move, `wrong` for the game move, and otherwise `evaluate` until given an evaluation of the attempt's position. It then grades with `gradePlayedMove` against the review's evaluation: Best, Excellent or Good counts, and a forced mate must be kept.
+- `recordResult`, `orderPuzzles` and `summarisePractice` keep progress and the order: never tried (most recently reviewed game first, in move order), then last failed, then last solved, least recently seen first.
 
 ## Scoring
 
