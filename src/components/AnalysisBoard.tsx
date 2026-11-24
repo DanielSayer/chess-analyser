@@ -25,6 +25,8 @@ interface Props {
   id?: string
   /** False makes the board view-only, e.g. after the game ends. */
   interactive?: boolean
+  /** A square to point out, e.g. the piece to move in a practice hint. */
+  hint?: string | null
 }
 
 // Opaque tints per square colour, so highlights stay warm on teal.
@@ -44,7 +46,7 @@ function kingSquare(chess: Chess, color: 'w' | 'b'): string | null {
   return null
 }
 
-export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, animate, onMove, id = 'analysis-board', interactive = true }: Props) {
+export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, animate, onMove, id = 'analysis-board', interactive = true, hint = null }: Props) {
   const [selection, setSelection] = useState<{ fen: string; square: string } | null>(null)
   const chess = useMemo(() => new Chess(fen), [fen])
   const selected = interactive && selection?.fen === fen ? selection.square : null
@@ -89,7 +91,7 @@ export function AnalysisBoard({ fen, orientation, lastMove, moveGrade, arrows, a
         clearArrowsOnPositionChange: true,
         squareStyles,
         squareRenderer: ({ square, children }) => (
-          <div className="board-square" style={squareStyles[square]} data-hint={hints.get(square)} data-check={square === checked || undefined}>
+          <div className="board-square" style={squareStyles[square]} data-hint={hints.get(square)} data-check={square === checked || undefined} data-pointed={square === hint || undefined}>
             {children}
             {moveGrade && square === lastMove?.to && <GradeBadge grade={moveGrade} size="board" />}
           </div>

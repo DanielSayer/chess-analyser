@@ -16,6 +16,7 @@ export default defineConfig({
             { name: 'react', test: vendor('react|react-dom|scheduler') },
             { name: 'heroui', test: vendor('@heroui|@react-aria|@react-stately|@react-types|@internationalized|react-aria|react-aria-components|react-stately|tailwind-variants|tailwind-merge|@swc') },
             { name: 'board', test: vendor('react-chessboard|@dnd-kit') },
+            { name: 'icons', test: vendor('lucide-react') },
           ],
         },
       },

@@ -1,10 +1,10 @@
 import { Alert, Button, ButtonGroup, Link, Spinner, Tabs, ToggleButton, ToggleButtonGroup } from '@heroui/react'
 import {
-  ArrowLeft, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Undo2,
+  ArrowLeft, ChevronFirst, ChevronLast, ChevronLeft, ChevronRight, ExternalLink, FlipVertical2, Lightbulb, Target, Undo2,
 } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { AnalysisPreset, GameReview, ImportedGame, ParsedGame, Side } from '../core'
-import { PRESETS, isPromotion, lineToSan, parseGame, sideForUsername } from '../core'
+import { PRESETS, collectPuzzles, isPromotion, lineToSan, parseGame, sideForUsername } from '../core'
 import { useGameReview } from '../hooks/useGameReview'
 import type { ReviewRun } from '../hooks/useGameReview'
 import { usePositionLines } from '../hooks/usePositionLines'
@@ -34,6 +34,10 @@ interface Props {
   onBack?: () => void
   backLabel?: string
   isActive?: boolean
+  /** Shows the position after half-move `ply`; a new `key` jumps again. */
+  jump?: { ply: number; key: number } | null
+  /** Opens a mistake from this game on the Practise page. */
+  onPractise?: (puzzleId: string) => void
 }
 
 const BEST_ARROW = 'rgba(224, 80, 31, 0.82)'
@@ -119,9 +123,14 @@ function PlayerStrip({ game, side, clock, accuracy, toMove }: {
   )
 }
 
-function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSaved, onStorageIssue, onBack, backLabel, parsed, isActive = true }: Props & { parsed: ParsedGame }) {
+function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSaved, onStorageIssue, onBack, backLabel, parsed, isActive = true, jump = null, onPractise }: Props & { parsed: ParsedGame }) {
   const analysis = useGameReview(game, { cached: cachedReview, onComplete: onReviewComplete, onSaved: onReviewSaved, onStorageIssue })
   const replay = useReplay(parsed)
+  const [jumpedTo, setJumpedTo] = useState<number | null>(null)
+  if (jump && jump.key !== jumpedTo) {
+    setJumpedTo(jump.key)
+    replay.goTo(jump.ply)
+  }
   const [flipped, setFlipped] = useState(false)
   const [showBest, setShowBest] = useState(true)
   const [preset, setPreset] = useState<AnalysisPreset>(cachedReview?.preset ?? 'standard')
@@ -131,6 +140,8 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
 
   const review = analysis.review
   const running = analysis.run !== null
+  // Imported games practise only the viewer's moves; local games both sides.
+  const puzzleIds = useMemo(() => new Set(review ? collectPuzzles([review], username).map(p => p.id) : []), [review, username])
 
   // The live graph outlives its run long enough to fly back into the panel.
   const [flight, setFlight] = useState<{ run: ReviewRun; landing: Landing | null } | null>(null)
@@ -259,6 +270,7 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
           replay={replay}
           lines={lines}
           running={running}
+          onPractise={onPractise && review && puzzleIds.has(`${review.gameId}:${index}`) ? () => onPractise(`${review.gameId}:${index}`) : undefined}
         />
 
         </div>}
@@ -350,13 +362,14 @@ function Workspace({ game, username, cachedReview, onReviewComplete, onReviewSav
 
 type Replay = ReturnType<typeof useReplay>
 
-function MoveInsight({ parsed, review, index, replay, lines, running }: {
+function MoveInsight({ parsed, review, index, replay, lines, running, onPractise }: {
   parsed: ParsedGame
   review: GameReview | null
   index: number
   replay: Replay
   lines: ReturnType<typeof usePositionLines>
   running: boolean
+  onPractise?: () => void
 }) {
   const { variation } = replay
   if (variation) {
@@ -437,9 +450,12 @@ function MoveInsight({ parsed, review, index, replay, lines, running }: {
               Best was <strong>{reviewed.bestSan}</strong>
               {reviewed.bestLine.length > 1 && <span className="muted"> · {numberedLine(ply.before, reviewed.bestLine.slice(0, 6))}</span>}
             </p>
-            <Button size="sm" variant="tertiary" onPress={() => replay.showLine(index - 1, reviewed.bestLine.length ? reviewed.bestLine : [reviewed.bestSan!])}>
-              Show line
-            </Button>
+            <div className="insight__actions">
+              {onPractise && <Button size="sm" variant="tertiary" onPress={onPractise}><Target size={14} /> Practise</Button>}
+              <Button size="sm" variant="tertiary" onPress={() => replay.showLine(index - 1, reviewed.bestLine.length ? reviewed.bestLine : [reviewed.bestSan!])}>
+                Show line
+              </Button>
+            </div>
           </div>
         ) : (
           <p className="muted">{reviewed.grade === 'forced' ? 'The only legal move.' : "Matches the engine's first choice."}</p>

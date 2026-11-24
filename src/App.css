@@ -371,6 +371,36 @@
 .promotion__option svg { width: 100%; height: 100%; }
 
 /* ------------------------------------------------------------------ Responsive */
+/* ------------------------------------------------------------------ Practise */
+.insight__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.insight__actions .button { gap: 5px; }
+/* Practice hint: a ring around the piece that has the better move. */
+.board-square[data-pointed]::after { content: ""; position: absolute; inset: 6%; border-radius: 50%; box-shadow: 0 0 0 3px var(--pen), 0 0 14px 2px color-mix(in oklab, var(--pen) 55%, transparent); pointer-events: none; z-index: 4; animation: hint-pulse 1.4s ease-in-out infinite; }
+@keyframes hint-pulse { 50% { box-shadow: 0 0 0 3px var(--pen), 0 0 4px 0 transparent; } }
+.practise-progress { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+.practise-progress > div { display: grid; gap: 2px; padding: 8px 6px; text-align: center; background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; }
+.practise-progress dt { font-size: 9.5px; letter-spacing: .8px; text-transform: uppercase; font-weight: 600; color: var(--ink-3); }
+.practise-progress dd { font-family: var(--font-mono); font-size: 18px; font-weight: 700; }
+.practise-progress__session { grid-column: 1 / -1; font-size: 12px; color: var(--ink-2); text-align: center; }
+.practise-task p:last-child { font-size: 13px; }
+.practise-note { min-height: 64px; align-content: center; }
+.practise-note.is-solved { border-left-color: var(--win); background: color-mix(in oklab, var(--win) 7%, var(--paper)); }
+.practise-note.is-wrong { border-left-color: var(--loss); }
+.practise-note.is-revealed { border-left-color: var(--pen); background: var(--pen-wash); }
+.practise-note.is-wrong .grade-badge { vertical-align: -3px; }
+.practise-note__checking { display: flex; align-items: center; gap: 8px; color: var(--ink-2); }
+.practise-note__line { font-size: 12px; }
+.practise-actions { gap: 10px; }
+.practise-actions__row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.practise-actions__row .button, .practise-actions__next { width: 100%; gap: 7px; }
+.practise-actions__next { min-height: 46px; font-size: 14px; }
+.practise-actions__skip { justify-self: center; color: var(--ink-2); }
+.practise .replay-controls__position { text-align: left; }
+.practise-empty { display: grid; justify-items: center; gap: 12px; max-width: 460px; margin: 12vh auto 0; padding: 0 20px; text-align: center; }
+.practise-empty h2 { font-size: 24px; font-weight: 750; letter-spacing: -.6px; }
+.practise-empty p { color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.practise-empty .button { gap: 7px; margin-top: 6px; }
+
 @media (max-width: 1450px) {
   .app { grid-template-columns: 204px minmax(0,1fr); }
   .navigation { padding-inline: 14px; }
@@ -420,6 +450,7 @@
   .nav-link { flex: 1; width: auto; min-height: 40px; gap: 8px; border-radius: 0; background: transparent !important; box-shadow: none !important; justify-content: center; }
   .nav-link > span, .nav-link__no { display: inline; }
   .nav-link > svg { display: none; }
+  .nav-link { padding-inline: 4px; font-size: 13px; }
   .nav-link[aria-current="page"]::before { left: 12px; right: 12px; top: auto; bottom: 0; width: auto; height: 3px; border-radius: 3px 3px 0 0; }
   .navigation__bottom { margin: 0; grid-column: 2; grid-row: 1; }
   .navigation__tools { flex-direction: row; border: 0; padding: 0; gap: 2px; }
