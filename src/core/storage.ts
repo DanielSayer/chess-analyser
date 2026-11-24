@@ -2,6 +2,7 @@ import { openDB } from 'idb'
 import type { DBSchema, IDBPDatabase } from 'idb'
 import { normaliseUsername } from './chesscom'
 import { ENGINE_NAME } from './engine'
+import type { PracticeRecord } from './practice'
 import { buildGradedReview, REVIEW_VERSION } from './review'
 import type { GameReview, ImportedGame } from './types'
 
@@ -9,15 +10,19 @@ interface AnalyserDB extends DBSchema {
   games: { key: string; value: ImportedGame }
   reviews: { key: string; value: GameReview }
   settings: { key: string; value: string }
+  practice: { key: string; value: PracticeRecord }
 }
 
 let database: Promise<IDBPDatabase<AnalyserDB>> | undefined
 function db(): Promise<IDBPDatabase<AnalyserDB>> {
-  database ??= openDB<AnalyserDB>('chess-analyser', 1, {
-    upgrade(database) {
-      database.createObjectStore('games', { keyPath: 'id' })
-      database.createObjectStore('reviews', { keyPath: 'gameId' })
-      database.createObjectStore('settings')
+  database ??= openDB<AnalyserDB>('chess-analyser', 2, {
+    upgrade(database, oldVersion) {
+      if (oldVersion < 1) {
+        database.createObjectStore('games', { keyPath: 'id' })
+        database.createObjectStore('reviews', { keyPath: 'gameId' })
+        database.createObjectStore('settings')
+      }
+      if (oldVersion < 2) database.createObjectStore('practice', { keyPath: 'id' })
     },
     blocking() {
       void database?.then(connection => connection.close())
@@ -53,15 +58,34 @@ export function isReviewForGame(review: GameReview, game: ImportedGame): boolean
 export async function loadReview(game: ImportedGame): Promise<GameReview | null> {
   const review = await (await db()).get('reviews', game.id)
   if (!review || !isReviewForGame(review, game)) return null
+  return current(review, game)
+}
+
+/** Grading changed but the engine work did not: regrade from stored positions. */
+async function current(review: GameReview, game: Pick<ImportedGame, 'id' | 'pgn' | 'opening' | 'eco'>): Promise<GameReview> {
   if (review.version === REVIEW_VERSION) return review
-  // Grading changed but the engine work did not: regrade from stored positions.
   try {
-    const regraded = { ...await buildGradedReview(game, review.positions, review.preset), createdAt: review.createdAt }
+    const regraded = { ...await buildGradedReview(game as ImportedGame, review.positions, review.preset), createdAt: review.createdAt }
     await saveReview(regraded)
     return regraded
   } catch {
     return review
   }
+}
+
+/** Every compatible saved review, for any game, regraded where needed. */
+export async function loadAllReviews(): Promise<GameReview[]> {
+  const reviews = await (await db()).getAll('reviews')
+  const usable = reviews.filter(review => isReviewForGame(review, { id: review.gameId, pgn: review.pgn } as ImportedGame))
+  return Promise.all(usable.map(review => current(review, { id: review.gameId, pgn: review.pgn, opening: review.opening, eco: review.eco })))
+}
+
+export async function loadPracticeRecords(): Promise<PracticeRecord[]> {
+  return (await db()).getAll('practice')
+}
+
+export async function savePracticeRecord(record: PracticeRecord): Promise<void> {
+  await (await db()).put('practice', record)
 }
 
 export async function loadReviewedIds(): Promise<string[]> {
@@ -77,7 +101,7 @@ export async function loadLastUsername(): Promise<string | null> {
 }
 
 export async function clearLocalData(): Promise<void> {
-  const tx = (await db()).transaction(['games', 'reviews', 'settings'], 'readwrite')
-  await Promise.all([tx.objectStore('games').clear(), tx.objectStore('reviews').clear(), tx.objectStore('settings').clear()])
+  const tx = (await db()).transaction(['games', 'reviews', 'settings', 'practice'], 'readwrite')
+  await Promise.all([tx.objectStore('games').clear(), tx.objectStore('reviews').clear(), tx.objectStore('settings').clear(), tx.objectStore('practice').clear()])
   await tx.done
 }
